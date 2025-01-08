@@ -1,0 +1,13 @@
+*.py[cod]
+__pycache__/
+*.so
+*.pyc
+
+
+# If you want to ignore settings.py (not recommended in production)
+brilink_project/settings.py
+media/*
+*.sql
+*.sqlite3
+static_root/*
+brilink_app/migrations/*
