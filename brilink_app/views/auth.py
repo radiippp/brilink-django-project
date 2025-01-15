@@ -65,7 +65,7 @@ class LoginViews(View):
         else:
             return redirect('app:index_home')
 
-@method_decorator(login_required(), name='dispatch')
+# @method_decorator(login_required(), name='dispatch')
 class LogoutViews(View):
     def get(self, request):
         logout_message = request.GET.get('logout_message', None)

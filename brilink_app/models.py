@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 
 
 ROLE_CHOICES = [
-    ('super_admin', 'Super Admin'),
+    ('developer', 'Developer'),
     ('admin', 'Admin'),
     ('teller', 'Teller'),
     ]
@@ -84,7 +84,7 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
     last_login = models.DateTimeField(null=True)
     phone = models.CharField(max_length=15)
     date_of_birth = models.DateField(blank=True, null=True)
-    avatar = models.ImageField(blank=True, null=True, upload_to='images/avatar/', default='images/avatar/default_avatar.png')
+    # avatar = models.ImageField(blank=True, null=True, upload_to='images/avatar/', default='images/avatar/default_avatar.png')
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='teller')
     email_verification_token = models.CharField(max_length=100, default='')
     
@@ -98,5 +98,52 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
 
     def get_short_name(self):
         return self.first_name
+    
+
+class Rekening(CreateUpdateTime):
+    rek_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    akun = models.ForeignKey(Master_User, on_delete=models.RESTRICT)
+    saldo = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+
+class Ewallet(CreateUpdateTime):
+    ewallet_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    nama = models.CharField(max_length=50, null=True)
+
+class Bank(CreateUpdateTime):
+    bank_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    nama = models.CharField(max_length=50, null=True)
+
+TYPE = [
+    ('transfer', 'Transfer'),
+    ('isi_saldo', 'Isi Saldo'),
+    ]
+
+TRANSACTION_TYPE = [
+    ('transfer', 'Transfer'),
+    ('isi_saldo', 'Isi Saldo'),
+]
+
+class Transaksi(CreateUpdateTime):
+    trans_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    rek = models.ForeignKey(Rekening, on_delete=models.RESTRICT, related_name='transaksi')
+    saldo_keluar = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    saldo_masuk = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    jenis = models.CharField(max_length=50, choices=TRANSACTION_TYPE, default='transfer')
+
+    def __str__(self):
+        return f"{self.jenis} - {self.trans_id}"
+
+    def save(self, *args, **kwargs):
+        """
+        Override save method to automatically update the saldo of related Rekening.
+        """
+        if self.saldo_masuk and self.saldo_masuk > 0:
+            self.rek.saldo += self.saldo_masuk
+        if self.saldo_keluar and self.saldo_keluar > 0:
+            self.rek.saldo -= self.saldo_keluar
+        self.rek.save()
+        super().save(*args, **kwargs)
+
+
     
 
