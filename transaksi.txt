@@ -1,0 +1,151 @@
+<div class="col-md-4">
+                                            <label for="filter-range" class="form-label">Filter Data</label>
+                                            <select id="filter-range" class="form-select">
+                                                <option value="1">1 Hari Terakhir</option>
+                                                <option value="7">7 Hari Terakhir</option>
+                                                <option value="30">30 Hari Terakhir</option>
+                                                <option value="custom">Pilih Rentang Tanggal</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="start-date" class="form-label">Tanggal Mulai</label>
+                                            <input type="date" id="start-date" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="end-date" class="form-label">Tanggal Selesai</label>
+                                            <input type="date" id="end-date" class="form-control" disabled>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <button id="filter-btn" class="btn btn-primary w-100">Filter</button>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button id="export-btn" class="btn btn-success w-100">Download Excel</button>
+                                            </div>
+                                        </div>
+
+
+                <table class="table table-bordered" id="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Nama</th>
+                                                <th>Username</th>
+                                                <th>Email</th>
+                                                <th>Role</th>
+                                                <th>Tanggal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data diisi manual untuk contoh -->
+                                            <tr>
+                                                <td>1</td>
+                                                <td>John Doe</td>
+                                                <td>johndoe</td>
+                                                <td>johndoe@example.com</td>
+                                                <td>Admin</td>
+                                                <td>2025-01-14</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>Jane Smith</td>
+                                                <td>janesmith</td>
+                                                <td>janesmith@example.com</td>
+                                                <td>User</td>
+                                                <td>2025-01-12</td>
+                                            </tr>
+                                            <tr>
+                                                <td>3</td>
+                                                <td>Mike Johnson</td>
+                                                <td>mikej</td>
+                                                <td>mikejohnson@example.com</td>
+                                                <td>Moderator</td>
+                                                <td>2024-12-30</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>           
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+                    <script>
+                        // Fungsi untuk memfilter data berdasarkan rentang waktu atau preset
+                        document.getElementById('filter-range').addEventListener('change', function () {
+                            const filterValue = this.value;
+                            const startDateInput = document.getElementById('start-date');
+                            const endDateInput = document.getElementById('end-date');
+                            const rows = document.querySelectorAll('#data-table tbody tr');
+                            const currentDate = new Date();
+                
+                            if (filterValue === '1' || filterValue === '7'|| filterValue === '30') {
+                                const startDate = new Date();
+                                startDate.setDate(currentDate.getDate() - filterValue);
+                
+                                rows.forEach(row => {
+                                    const dateText = row.cells[5].innerText; // Kolom tanggal
+                                    const rowDate = new Date(dateText);
+                
+                                    if (rowDate >= startDate && rowDate <= currentDate) {
+                                        row.style.display = '';
+                                    } else {
+                                        row.style.display = 'none';
+                                    }
+                                });
+                
+                                startDateInput.value = startDate.toISOString().split('T')[0];
+                                endDateInput.value = currentDate.toISOString().split('T')[0];
+                                startDateInput.disabled = true;
+                                endDateInput.disabled = true;
+                
+                            } else if (filterValue === 'custom') {
+                                startDateInput.disabled = false;
+                                endDateInput.disabled = false;
+                                rows.forEach(row => row.style.display = '');
+                            }
+                        });
+                
+                        document.getElementById('filter-btn').addEventListener('click', function () {
+                            const startDate = new Date(document.getElementById('start-date').value);
+                            const endDate = new Date(document.getElementById('end-date').value);
+                            const rows = document.querySelectorAll('#data-table tbody tr');
+                
+                            if (!startDate || !endDate || (endDate - startDate) / (1000 * 60 * 60 * 24) > 30) {
+                                alert('Harap pilih rentang tanggal yang valid (maksimal 30 hari).');
+                                return;
+                            }
+                
+                            rows.forEach(row => {
+                                const dateText = row.cells[5].innerText; // Kolom tanggal
+                                const rowDate = new Date(dateText);
+                
+                                if (rowDate >= startDate && rowDate <= endDate) {
+                                    row.style.display = '';
+                                } else {
+                                    row.style.display = 'none';
+                                }
+                            });
+                        });
+                
+                        // Fungsi untuk mengekspor tabel ke Excel
+                        document.getElementById('export-btn').addEventListener('click', function () {
+                            const table = document.getElementById('data-table');
+                            const startDate = document.getElementById('start-date').value;
+                            const endDate = document.getElementById('end-date').value;
+                            const fileName = `RekapData_${startDate}_to_${endDate}.xlsx`;
+                
+                            const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet 1" });
+                            XLSX.writeFile(wb, fileName);
+                        });
+                
+                        // Set filter default ke 1 hari terakhir
+                        window.onload = function () {
+                            const currentDate = new Date();
+                            const yesterday = new Date(currentDate);
+                            yesterday.setDate(yesterday.getDate() - 1);
+                
+                            document.getElementById('start-date').value = yesterday.toISOString().split('T')[0];
+                            document.getElementById('end-date').value = currentDate.toISOString().split('T')[0];
+                            document.getElementById('filter-range').value = '1';
+                            document.getElementById('filter-range').dispatchEvent(new Event('change'));
+                        };
+                    </script>

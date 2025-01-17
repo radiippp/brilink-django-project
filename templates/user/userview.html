@@ -1,0 +1,59 @@
+{% extends "base/base.html" %} {% load static %} 
+{% block title %} Test Export Excel {% endblock %}
+{% block main %}
+					<div class="side-app">
+						<div class="page-header">
+							<div>
+								<h1 class="page-title">Daftar user</h1>
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#">User</a></li>
+									<li class="breadcrumb-item active" aria-current="page">Daftar User</li>
+								</ol>
+							</div>
+                        </div>
+
+                        <div class="row row-sm">
+							<div class="col-lg-12">
+								<div class="card">
+									<div class="card-header">
+										<h3 class="card-title">Daftar User</h3>
+									</div>
+									<div class="card-body">
+										<div class="table-responsive">
+											<table class="table table-bordered text-nowrap border-bottom w-100" id="responsive-datatable">
+												<thead>
+													<tr>
+                                                        <th class="border-bottom-0">No</th>
+														<th class="border-bottom-0">Nama</th>
+														<th class="border-bottom-0">Username</th>
+														<th class="border-bottom-0">Email</th>
+														<th class="border-bottom-0">Role</th>
+														<th class="border-bottom-0">Action</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for dt_user in user %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>{{dt_user.full_name }}</td>
+                                                        <td>{{dt_user.username }}</td>
+                                                        <td>{{dt_user.email }}</td>
+                                                        <td>{{dt_user.get_role_display }}</td>
+                                                        <td>disini titik 3</td>
+													</tr>
+                                                    {% endfor %}
+												</tbody>
+											</table>
+										</div>
+                                    </div>
+								</div>
+							</div>
+						</div>
+                    </div>
+
+
+
+
+                
+                    
+{% endblock %}

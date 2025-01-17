@@ -9,11 +9,7 @@ import random , string
 from django.core.exceptions import ValidationError
 
 
-ROLE_CHOICES = [
-    ('developer', 'Developer'),
-    ('admin', 'Admin'),
-    ('teller', 'Teller'),
-    ]
+
 
 class CreateUpdateTime(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -69,6 +65,12 @@ class Master_UserManager(BaseUserManager):
 
         return self._create_user(email, username, phone, password, **extra_fields)
     
+ROLE_CHOICES = [
+    ('developer', 'Developer'),
+    ('admin', 'Admin'),
+    ('teller', 'Teller'),
+    ]
+    
 """TABEL AKUN UNTUK SELAIN BAWAANNYA DJANGO YANG DIPAKAI"""
 class Master_User(AbstractBaseUser, CreateUpdateTime):
     user_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -112,11 +114,6 @@ class Ewallet(CreateUpdateTime):
 class Bank(CreateUpdateTime):
     bank_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     nama = models.CharField(max_length=50, null=True)
-
-TYPE = [
-    ('transfer', 'Transfer'),
-    ('isi_saldo', 'Isi Saldo'),
-    ]
 
 TRANSACTION_TYPE = [
     ('transfer', 'Transfer'),
