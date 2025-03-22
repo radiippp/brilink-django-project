@@ -66,6 +66,10 @@
 		</div>
 		<!-- /GLOBAL-LOADER -->
 
+		{% if messages %} {% for message in messages %}
+		<div alt="{{message.tags}}" data="{{message}}" id="msg_pesan"></div>
+		{% endfor %} {% endif %}
+
 		<!-- PAGE -->
 		<div class="page">
 			<div class="page-main">
@@ -77,6 +81,31 @@
 
     <!-- BACK-TO-TOP -->
 		<a href="#top" id="back-to-top"><i class="fa fa-angle-up"></i></a>
+
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script type="text/javascript">
+		function show_notif(meseg, jenis_icon) {
+			if (jenis_icon == "error") {
+			button_style = "btn-danger";
+			} else {
+			button_style = `btn-${jenis_icon}`;
+			}
+
+			Swal.fire({
+			html: meseg,
+			icon: jenis_icon,
+			buttonsStyling: false,
+			confirmButtonText: "OK",
+			customClass: {
+				confirmButton: `btn ${button_style}`,
+			},
+			});
+		}
+
+		if ($("#msg_pesan").length) {
+			show_notif($("#msg_pesan").attr("data"), $("#msg_pesan").attr("alt"));
+		}
+		</script>
 
 		<!-- JQUERY JS -->
 		<script src="{% static 'js/jquery.min.js'%}"></script>

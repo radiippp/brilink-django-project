@@ -61,11 +61,11 @@ class LoginViews(View):
                     return redirect('app:index_home')
             else:
                 messages.error(request, "Login gagal, silahkan masukkan data dengan benar")
-                return redirect('app:login')
+                return redirect('app:login_page')
         else:
             return redirect('app:index_home')
 
-# @method_decorator(login_required(), name='dispatch')
+@method_decorator(login_required(), name='dispatch')
 class LogoutViews(View):
     def get(self, request):
         logout_message = request.GET.get('logout_message', None)
@@ -73,4 +73,4 @@ class LogoutViews(View):
             messages.info(request, logout_message)
         
         logout(request)
-        return redirect(request.META['HTTP_REFERER'])
+        return redirect('app:login_page')

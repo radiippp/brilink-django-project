@@ -17,6 +17,9 @@
 								<div class="card">
 									<div class="card-header">
 										<h3 class="card-title">Daftar User</h3>
+										<div class="ms-auto pageheader-btn">
+											<a href="#" data-bs-target="#modaldemo1" data-bs-toggle="modal" class="btn btn-success">Tambah data</a>
+										  </div>
 									</div>
 									<div class="card-body">
 										<div class="table-responsive">
@@ -39,8 +42,69 @@
                                                         <td>{{dt_user.username }}</td>
                                                         <td>{{dt_user.email }}</td>
                                                         <td>{{dt_user.get_role_display }}</td>
-                                                        <td>disini titik 3</td>
+                                                        <td>
+															<div class="btn-group mt-2 mb-2">
+																<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+																  Action <span class="caret"></span>
+																</button>
+																<ul class="dropdown-menu dropdown-menu-start shadow-lg p-3 mb-5 bg-body" role="menu" style="border-radius: 10px;">
+																  <li>
+																	<!-- Edit data dengan ikon biru -->
+																	<a class="dropdown-item d-flex align-items-center" href="#" data-bs-target="#modaldemo2{{ dt_user.user_id }}" data-bs-toggle="modal" style="padding: 10px; font-weight: bold;">
+																	  <i class="fa fa-pencil me-2" style="font-size: 1.2rem; color: #007bff;"></i> Edit data
+																	</a>
+																  </li>
+																  <li>
+																	<!-- Hapus data dengan ikon dan teks berwarna merah -->
+																	<a class="dropdown-item d-flex align-items-center" href="{% url 'app:hapus_user' id_akun=dt_user.user_id %} " data-message="Apakah Anda yakin ingin menghapus Berita ini?" style="padding: 10px; font-weight: bold; color: #dc3545;">
+																	  <i class="ion-trash-b me-2" style="font-size: 1.2rem; color: #dc3545;"></i> Hapus data
+																	</a>
+																  </li>
+																</ul>
+															  </div> 
+														</td>
 													</tr>
+													<div class="modal fade" id="modaldemo2{{ dt_user.user_id }}" tabindex="-1" aria-labelledby="modaldemo2Label" aria-hidden="true">
+														<div class="modal-dialog" role="document">
+														  <div class="modal-content">
+															<div class="modal-header">
+															  <h5 class="modal-title" id="modaldemo2Label">Edit form</h5>
+															  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+															</div>
+															<div class="modal-body">
+															  <form action="{% url 'app:edit_user' id_akun=dt_user.user_id %}" method="post">
+																{% csrf_token %}
+																<div class="mb-3">
+																  <label for="full_name" class="form-label">Nama Lengkap</label>
+																  <input type="text" value="{{ dt_user.full_name }}" name="full_name" class="form-control" id="full_name" required />
+																</div>
+																<div class="mb-3">
+																  <label for="username" class="form-label">Username</label>
+																  <input type="text" value="{{ dt_user.username }}" name="username" class="form-control" id="username" required />
+																</div>
+																<div class="mb-3">
+																  <label for="email" class="form-label">E-mail</label>
+																  <input type="email" value="{{ dt_user.email }}" name="email" class="form-control" id="email" required />
+																</div>
+																<div class="mb-3">
+																  <label for="phone" class="form-label">Phone</label>
+																  <input type="tel" value="{{ dt_user.phone }}" name="phone" class="form-control" id="phone" required />
+																</div>
+												
+																<div class="mb-3">
+																  <label for="password" class="form-label">Password</label>
+																  <input type="password" name="password" class="form-control" id="password" />
+																  <small>Biarkan Kosong jika tidak ingin mengubah password</small>
+																</div>
+																<div class="modal-footer">
+																  <button type="submit" class="btn btn-primary">Save changes</button>
+																  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+																</div>
+															  </form>
+															</div>
+														  </div>
+														</div>
+													  </div>
                                                     {% endfor %}
 												</tbody>
 											</table>
@@ -50,6 +114,56 @@
 							</div>
 						</div>
                     </div>
+					<div class="modal fade" id="modaldemo1" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
+						<div class="modal-dialog" role="document">
+						  <div class="modal-content">
+							<div class="modal-header">
+							  <h5 class="modal-title" id="modaldemo1Label">Register Form</h5>
+							  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+							  <form action="{% url 'app:tambah_user' %}" method="post">
+								{% csrf_token %}
+								<div class="mb-3">
+								  <label for="full_name" class="form-label">Nama Lengkap</label>
+								  <input type="text" name="full_name" class="form-control" id="full_name" required />
+								</div>
+								<div class="mb-3">
+								  <label for="username" class="form-label">Username</label>
+								  <input type="text" name="username" class="form-control" id="username" required />
+								</div>
+								<div class="mb-3">
+								  <label for="email" class="form-label">E-mail</label>
+								  <input type="email" name="email" class="form-control" id="email" required />
+								</div>
+								<div class="mb-3">
+								  <label for="phone" class="form-label">Phone</label>
+								  <input type="tel" name="phone" class="form-control" id="phone" required />
+								</div>
+								{% if request.user.role == 'developer' %}
+								<div class="mb-3">
+								  <label for="phone" class="form-label">Role</label>
+								  <select class="form-select form-select-solid" name="role" id="role" required>
+									<option disabled selected value>-- select an option --</option>
+									<option value="admin">Admin</option>
+									<option value="teller">Teller</option>
+								  </select>
+								</div>
+								{% endif %}
+								<div class="mb-3">
+								  <label for="password" class="form-label">Password</label>
+								  <input type="password" name="password" class="form-control" id="password" required />
+								</div>
+								<div class="modal-footer">
+								  <button type="submit" class="btn btn-primary">Save changes</button>
+								  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								</div>
+							  </form>
+							</div>
+						  </div>
+						</div>
+					  </div>
+		
 
 
 
