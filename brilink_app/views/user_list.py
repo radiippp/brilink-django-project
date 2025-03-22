@@ -7,16 +7,19 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.utils.decorators import method_decorator
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 
-
+@method_decorator(login_required(), name='dispatch')
 class UserViews(View):
     def get(self, request):
-        user = Master_User.objects.all()
+        user = Master_User.objects.filter(deleted_at__isnull=True)
         data ={
             'user' : user,
             }
         return render(request, 'user/userview.html',data)
 
+@method_decorator(login_required(), name='dispatch')
 #create user
 class CreateViews(View):
     def get(self, request):
@@ -49,6 +52,7 @@ class CreateViews(View):
             messages.error(request, "Gagal menambahkan akun")
             return redirect('app:index_user')
         
+@method_decorator(login_required(), name='dispatch')
  #Edit Data       
 class EditViews(View):
     def get(self, request, id_akun):
@@ -96,7 +100,8 @@ class EditViews(View):
             print('Error:', e)
             messages.error(request, "Gagal mengubah akun")
             return redirect('app:index_user')
-        
+
+@method_decorator(login_required(), name='dispatch')        
 class HapusViews(View):
     def get(self, request, id_akun):
         try:
@@ -109,6 +114,7 @@ class HapusViews(View):
             messages.error(request, "Akun tidak ditemukan")
         return redirect('app:index_user')
     
+@method_decorator(login_required(), name='dispatch')    
 class ProfileViews(View):
     def get(self, request, id_akun):
         try:

@@ -42,27 +42,11 @@
                                                         <td>{{dt_user.username }}</td>
                                                         <td>{{dt_user.email }}</td>
                                                         <td>{{dt_user.get_role_display }}</td>
-                                                        <td>
-															<div class="btn-group mt-2 mb-2">
-																<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
-																  Action <span class="caret"></span>
-																</button>
-																<ul class="dropdown-menu dropdown-menu-start shadow-lg p-3 mb-5 bg-body" role="menu" style="border-radius: 10px;">
-																  <li>
-																	<!-- Edit data dengan ikon biru -->
-																	<a class="dropdown-item d-flex align-items-center" href="#" data-bs-target="#modaldemo2{{ dt_user.user_id }}" data-bs-toggle="modal" style="padding: 10px; font-weight: bold;">
-																	  <i class="fa fa-pencil me-2" style="font-size: 1.2rem; color: #007bff;"></i> Edit data
-																	</a>
-																  </li>
-																  <li>
-																	<!-- Hapus data dengan ikon dan teks berwarna merah -->
-																	<a class="dropdown-item d-flex align-items-center" href="{% url 'app:hapus_user' id_akun=dt_user.user_id %} " data-message="Apakah Anda yakin ingin menghapus Berita ini?" style="padding: 10px; font-weight: bold; color: #dc3545;">
-																	  <i class="ion-trash-b me-2" style="font-size: 1.2rem; color: #dc3545;"></i> Hapus data
-																	</a>
-																  </li>
-																</ul>
-															  </div> 
+                                                        <td class="">
+															<a class="btn btn-primary btn-sm rounded-11 me-2" data-bs-target="#modaldemo2{{ dt_user.user_id }}" data-bs-toggle="modal" data-bs-original-title="Edit"><i><svg class="table-edit" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34c-.2-.2-.45-.29-.71-.29s-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41z"/></svg></i></a>
+															<a class="btn btn-danger btn-sm rounded-11" data-bs-toggle="tooltip" data-bs-original-title="Delete" href="{% url 'app:hapus_user' id_akun=dt_user.user_id %} " data-message="Apakah Anda yakin ingin menghapus Akun ini?"><i><svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg></i></a>
 														</td>
+													</tr>
 													</tr>
 													<div class="modal fade" id="modaldemo2{{ dt_user.user_id }}" tabindex="-1" aria-labelledby="modaldemo2Label" aria-hidden="true">
 														<div class="modal-dialog" role="document">

@@ -14,12 +14,11 @@ class RekViews(View):
             }
         return render(request, 'home/index_home.html',data)
 
-#create user
+#create rek
 class RekCreateViews(View):
     def post(self, request):
         frm_id_pemilik = request.POST.get('id_pemilik')
         frm_saldo = request.POST.get('saldo_awal')
-        
 
         try:
             tmp_user = get_object_or_404(Master_User, user_id=frm_id_pemilik)

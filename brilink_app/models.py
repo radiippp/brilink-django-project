@@ -68,7 +68,6 @@ class Master_UserManager(BaseUserManager):
 ROLE_CHOICES = [
     ('developer', 'Developer'),
     ('admin', 'Admin'),
-    ('teller', 'Teller'),
     ]
     
 """TABEL AKUN UNTUK SELAIN BAWAANNYA DJANGO YANG DIPAKAI"""
@@ -87,7 +86,7 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
     phone = models.CharField(max_length=15)
     date_of_birth = models.DateField(blank=True, null=True)
     # avatar = models.ImageField(blank=True, null=True, upload_to='images/avatar/', default='images/avatar/default_avatar.png')
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='teller')
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='admin')
     email_verification_token = models.CharField(max_length=100, default='')
     
     objects = Master_UserManager()

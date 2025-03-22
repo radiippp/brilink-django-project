@@ -37,8 +37,8 @@ class LoginViews(View):
 
     def post(self, request):
         if not request.user.is_authenticated:
-            email = request.POST.get('frm_email')
-            pwd = request.POST.get('frm_pwd')
+            email = request.POST.get('email')
+            pwd = request.POST.get('password')
 
             is_email = check_is_email(email)
             

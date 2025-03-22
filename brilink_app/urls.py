@@ -17,5 +17,7 @@ urlpatterns = [
        path('hapus/<str:id_akun>/', user_list.HapusViews.as_view(), name='hapus_user'),
        path('profile/<str:id_akun>/', user_list.ProfileViews.as_view(), name='profile_user'),
        ])),
+
+    path('rekening/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
     
 ]
