@@ -1,0 +1,210 @@
+{% extends "base/base.html" %} {% load static %} {% load humanize %}
+{% block title %} Test Export Excel {% endblock %}
+{% block main %}
+					<div class="side-app">
+						<div class="page-header">
+							<div>
+								<h1 class="page-title">Transaksi</h1>
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#">Transaksi</a></li>
+									<li class="breadcrumb-item active" aria-current="page">Riwayat Transaksi</li>
+								</ol>
+							</div>
+                        </div>
+
+                        <div class="row row-sm">
+							<div class="col-lg-12">
+								<div class="card">
+									<div class="card-header">
+										<h3 class="card-title">Riwayat Transaksi</h3>
+										<div class="ms-auto pageheader-btn">
+											<a href="#" data-bs-target="#modaldemo1" data-bs-toggle="modal" class="btn btn-success">Tambah data</a>
+										  </div>
+									</div>
+									<div class="card-body">
+										<div class="table-responsive">
+											<table class="table table-bordered text-nowrap border-bottom w-100" id="responsive-datatable">
+												<thead>
+													<tr>
+                                                        <th class="border-bottom-0">No</th>
+														<th class="border-bottom-0">Tanggal</th>
+														<th class="border-bottom-0">Jenis</th>
+														<th class="border-bottom-0">Tujuan</th>
+														<th class="border-bottom-0">Saldo</th>
+														<th class="border-bottom-0">Action</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for dt_trans in transaksi %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>{{dt_trans.created_at|date:"d/m/Y" }}</td>
+                                                        <td>{{dt_trans.get_jenis_display }}</td>
+                                                        <td>{{dt_trans.tujuan }}</td>
+                                                        {% if dt_trans.jenis == "transfer" or dt_trans.jenis == "tarik_tunai" %}
+                                                        <td>{{ dt_trans.saldo_keluar|intcomma }}</td>
+                                                        {% else %}
+                                                        <td>{{ dt_trans.saldo_masuk|intcomma }}</td>
+                                                        {% endif %}
+                                                        <td class="">
+															<a class="btn btn-primary btn-sm rounded-11 me-2" data-bs-target="#modaldemo2{{ dt_user.user_id }}" data-bs-toggle="modal" data-bs-original-title="Edit"><i><svg class="table-edit" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34c-.2-.2-.45-.29-.71-.29s-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41z"/></svg></i></a>
+															<a class="btn btn-danger btn-sm rounded-11" data-bs-toggle="tooltip" data-bs-original-title="Delete" href="# " data-message="Apakah Anda yakin ingin menghapus Akun ini?"><i><svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg></i></a>
+														</td>
+													</tr>
+                                                    {% endfor %}
+												</tbody>
+											</table>
+										</div>
+                                    </div>
+								</div>
+							</div>
+						</div>
+                    </div>
+					<div class="modal fade" id="modaldemo1" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
+						<div class="modal-dialog" role="document">
+						  <div class="modal-content">
+							<div class="modal-header">
+							  <h5 class="modal-title" id="modaldemo1Label">Tambah Transaksi</h5>
+							  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+							  <form action="{% url 'app:tambah_transaksi' %}" method="post">
+								{% csrf_token %}
+								<!-- Pilihan Jenis Transaksi -->
+                                <div class="mb-3">
+                                    <label for="jenis" class="form-label">Jenis Transaksi</label>
+                                    <select name="jenis" id="jenis" class="form-control" required onchange="toggleTransactionFields()">
+                                    <option value="" selected disabled>Pilih Jenis</option>
+                                    <option value="transfer">Transfer</option>
+                                    <option value="tarik_tunai">Tarik Tunai</option>
+                                    <option value="isi_saldo">Isi Saldo</option>
+                                    </select>
+                                </div>
+
+                                <!-- Pilihan Tujuan Transfer -->
+                                <div class="mb-3" id="transfer-options" style="display: none;">
+                                    <label for="tujuan" class="form-label">Tujuan Transfer</label>
+                                    <select name="tujuan" id="tujuan" class="form-control" onchange="toggleEwalletBankFields()">
+                                    <option value="" selected disabled>Pilih Tujuan</option>
+                                    <option value="ewallet">E-Wallet</option>
+                                    <option value="bank">Bank</option>
+                                    </select>
+                                </div>
+
+                                <!-- Dropdown untuk E-Wallet -->
+                                <div class="mb-3" id="ewallet-options" style="display: none;">
+                                    <label for="ewallet" class="form-label">Pilih E-Wallet</label>
+                                    <select name="ewallet" id="ewallet" class="form-control">
+                                    <option value="" selected disabled>Pilih E-Wallet</option>
+                                    <option value="DANA">DANA</option>
+                                    <option value="OVO">OVO</option>
+                                    <option value="GoPay">GoPay</option>
+                                    </select>
+                                </div>
+
+                                <!-- Dropdown untuk Bank -->
+                                <div class="mb-3" id="bank-options" style="display: none;">
+                                    <label for="bank" class="form-label">Pilih Bank</label>
+                                    <select name="bank" id="bank" class="form-control">
+                                    <option value="" selected disabled>Pilih Bank</option>
+                                    <option value="BRI">BRI</option>
+                                    <option value="BNI">BNI</option>
+                                    <option value="BCA">BCA</option>
+                                    <option value="Mandiri">Mandiri</option>
+                                    <option value="lainnya">Lainnya</option>
+                                    </select>
+                                </div>
+
+                                <!-- Input untuk Bank Lainnya -->
+                                <div class="mb-3" id="bank-lainnya" style="display: none;">
+                                    <label for="bank_lainnya" class="form-label">Nama Bank Lainnya</label>
+                                    <input type="text" name="bank_lainnya" id="bank_lainnya" class="form-control" placeholder="Masukkan Nama Bank">
+                                </div>
+
+                                <!-- Input Saldo Keluar -->
+                                <div class="mb-3" id="saldo-keluar" style="display: none;">
+                                    <label for="saldo_keluar" class="form-label">Jumlah Saldo Keluar</label>
+                                    <input type="number" name="saldo_keluar" class="form-control" id="saldo_keluar">
+                                </div>
+
+                                <!-- Input Saldo Masuk -->
+                                <div class="mb-3" id="saldo-masuk" style="display: none;">
+                                    <label for="saldo_masuk" class="form-label">Jumlah Saldo Masuk</label>
+                                    <input type="number" name="saldo_masuk" class="form-control" id="saldo_masuk">
+                                </div>
+								<div class="modal-footer">
+								  <button type="submit" class="btn btn-primary">Save changes</button>
+								  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								</div>
+							  </form>
+							</div>
+						  </div>
+						</div>
+					  </div>
+
+                      <script>
+  function toggleTransactionFields() {
+    var jenis = document.getElementById("jenis").value;
+    var transferOptions = document.getElementById("transfer-options");
+    var saldoKeluar = document.getElementById("saldo-keluar");
+    var saldoMasuk = document.getElementById("saldo-masuk");
+
+    if (jenis === "transfer") {
+      transferOptions.style.display = "block";
+      saldoKeluar.style.display = "block";
+      saldoMasuk.style.display = "none";
+    } else if (jenis === "tarik_tunai") {
+      transferOptions.style.display = "none";
+      saldoKeluar.style.display = "block";
+      saldoMasuk.style.display = "none";
+    } else if (jenis === "isi_saldo") {
+      transferOptions.style.display = "none";
+      saldoKeluar.style.display = "none";
+      saldoMasuk.style.display = "block";
+    } else {
+      transferOptions.style.display = "none";
+      saldoKeluar.style.display = "none";
+      saldoMasuk.style.display = "none";
+    }
+
+    toggleEwalletBankFields(); // Reset e-wallet/bank fields jika berubah
+  }
+
+  function toggleEwalletBankFields() {
+    var tujuan = document.getElementById("tujuan").value;
+    var ewalletOptions = document.getElementById("ewallet-options");
+    var bankOptions = document.getElementById("bank-options");
+
+    if (tujuan === "ewallet") {
+      ewalletOptions.style.display = "block";
+      bankOptions.style.display = "none";
+    } else if (tujuan === "bank") {
+      ewalletOptions.style.display = "none";
+      bankOptions.style.display = "block";
+    } else {
+      ewalletOptions.style.display = "none";
+      bankOptions.style.display = "none";
+    }
+
+    toggleBankLainnya();
+  }
+
+  function toggleBankLainnya() {
+    var bank = document.getElementById("bank").value;
+    var bankLainnya = document.getElementById("bank-lainnya");
+
+    if (bank === "lainnya") {
+      bankLainnya.style.display = "block";
+    } else {
+      bankLainnya.style.display = "none";
+    }
+  }
+</script>
+		
+
+
+
+
+                
+                    
+{% endblock %}

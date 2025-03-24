@@ -19,5 +19,9 @@ urlpatterns = [
        ])),
 
     path('rekening/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
+    path('transaksi/', include([
+        path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
+        path('tambah/',transaksi.TransCreateViews.as_view(), name='tambah_transaksi'),
+    ]))
     
 ]

@@ -1,50 +1,72 @@
 from datetime import timezone
 from django.views import View
-from brilink_app.models import Master_User
+from brilink_app.models import Transaksi, Master_User, Rekening
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 
 
-class UserViews(View):
+class TransaksiViews(View):
     def get(self, request):
-        user = Master_User.objects.all()
-        data ={
-            'user' : user,
-            }
-        return render(request, 'user/userview.html',data)
+        rekening = Rekening.objects.filter(akun=request.user).first()
 
-#create user
-class CreateViews(View):
+        # Ambil semua transaksi yang terkait dengan rekening user
+        transaksi = Transaksi.objects.filter(rek=rekening).order_by('-created_at') if rekening else []
+        data ={
+            'transaksi' : transaksi,
+            }
+        return render(request, 'transaksi/transaksi.html',data)
+
+def to_float(value):
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return 0
+#create transaksi
+class TransCreateViews(View):
     def get(self, request):
         data = {
             'edit': False,
         }
         return render(request, 'user/userview.html', data)
     def post(self, request):
-        frm_nama_lengkap = request.POST.get('full_name')
-        frm_username = request.POST.get('username')
-        frm_email = request.POST.get('email')
-        frm_phone = request.POST.get('phone')
-        frm_password = request.POST.get('password')
+        frm_saldo_keluar = to_float(request.POST.get("saldo_keluar", "0"))
+        frm_saldo_masuk = to_float(request.POST.get("saldo_masuk", "0"))
+        frm_jenis = request.POST.get('jenis')
+        frm_tujuan = request.POST.get('tujuan')
+        frm_ewallet = request.POST.get('ewallet')
+        frm_bank = request.POST.get('bank')
 
         try:
-            
-            with transaction.atomic():
-                insert = Master_User.objects.create_user(
-                    email=frm_email,
-                    username=frm_username,
-                    phone=frm_phone,
-                    password=frm_password,
-                    full_name=frm_nama_lengkap,
-                )
-                messages.success(request, f"Akun berhasil ditambahkan")
-                return redirect('app:index_user')
+            rekening = Rekening.objects.filter(akun=request.user).first()
+            if rekening:
+                with transaction.atomic():
+                    # Siapkan data yang akan disimpan
+                    data_transaksi = {
+                        "rek": rekening,
+                        "jenis": frm_jenis
+                    }
+
+                    if frm_jenis == "transfer":
+                        data_transaksi["saldo_keluar"] = frm_saldo_keluar
+                        if frm_tujuan == "ewallet":
+                            data_transaksi["tujuan"] = frm_ewallet
+                        elif frm_tujuan == "bank":
+                            data_transaksi["tujuan"] = frm_bank
+                    elif frm_jenis == "tarik_tunai":
+                        data_transaksi["saldo_keluar"] = frm_saldo_keluar
+                    else:
+                        data_transaksi["saldo_masuk"] = frm_saldo_masuk
+
+                    # Simpan transaksi ke database
+                    Transaksi.objects.create(**data_transaksi)
+                messages.success(request, f"Transaksi berhasil ditambahkan")
+                return redirect('app:index_transaksi')
 
         except Exception as e:
             print('error akun:', e)
-            messages.error(request, "Gagal menambahkan akun")
-            return redirect('app:index_user')
+            messages.error(request, "Gagal menambahkan Transaksi")
+            return redirect('app:index_transaksi')
         
  #Edit Data       
 class EditViews(View):
@@ -94,14 +116,14 @@ class EditViews(View):
             messages.error(request, "Gagal mengubah akun")
             return redirect('app:index_user')
         
-class HapusViews(View):
-    def get(self, request, id_akun):
+class TransHapusViews(View):
+    def get(self, request, id_trans):
         try:
-            akun = Master_User.objects.get(user_id=id_akun)
-            akun.deleted_at = timezone.now() #bikin arsip data, filter by deleted_at nya
-            akun.save() 
-            # akun.delete()
-            messages.success(request, f"{akun.full_name} berhasil dihapus")
+            trans = Rekening.objects.get(trans_id=id_trans)
+            trans.deleted_at = timezone.now() #bikin arsip data, filter by deleted_at nya
+            trans.save() 
+            # trans.delete()
+            messages.success(request, f"Transaksi berhasil dihapus")
         except Master_User.DoesNotExist:
-            messages.error(request, "Akun tidak ditemukan")
-        return redirect('app:index_user')
+            messages.error(request, "Transaksi tidak ditemukan")
+        return redirect('app:index_transaksi')

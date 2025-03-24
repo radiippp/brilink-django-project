@@ -6,7 +6,7 @@ import uuid
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 import random , string
-from django.core.exceptions import ValidationError
+from decimal import Decimal
 
 
 
@@ -105,17 +105,15 @@ class Rekening(CreateUpdateTime):
     rek_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     akun = models.ForeignKey(Master_User, on_delete=models.RESTRICT)
     saldo = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    def total_saldo_masuk(self):
+        return self.transaksi.aggregate(total=models.Sum('saldo_masuk'))['total'] or 0
 
-class Ewallet(CreateUpdateTime):
-    ewallet_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    nama = models.CharField(max_length=50, null=True)
-
-class Bank(CreateUpdateTime):
-    bank_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    nama = models.CharField(max_length=50, null=True)
+    def total_saldo_keluar(self):
+        return self.transaksi.aggregate(total=models.Sum('saldo_keluar'))['total'] or 0
 
 TRANSACTION_TYPE = [
     ('transfer', 'Transfer'),
+    ('tarik_tunai', 'Tarik Tunai'),
     ('isi_saldo', 'Isi Saldo'),
 ]
 
@@ -125,6 +123,7 @@ class Transaksi(CreateUpdateTime):
     saldo_keluar = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     saldo_masuk = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     jenis = models.CharField(max_length=50, choices=TRANSACTION_TYPE, default='transfer')
+    tujuan = models.CharField(max_length=50, null=True)
 
     def __str__(self):
         return f"{self.jenis} - {self.trans_id}"
@@ -134,9 +133,9 @@ class Transaksi(CreateUpdateTime):
         Override save method to automatically update the saldo of related Rekening.
         """
         if self.saldo_masuk and self.saldo_masuk > 0:
-            self.rek.saldo += self.saldo_masuk
+            self.rek.saldo += Decimal(str(self.saldo_masuk))
         if self.saldo_keluar and self.saldo_keluar > 0:
-            self.rek.saldo -= self.saldo_keluar
+            self.rek.saldo -= Decimal(str(self.saldo_keluar))
         self.rek.save()
         super().save(*args, **kwargs)
 
