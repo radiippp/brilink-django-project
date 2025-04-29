@@ -4,17 +4,23 @@ from brilink_app.models import Transaksi, Master_User, Rekening
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from decimal import Decimal
+from django.utils import timezone
 
-
+@method_decorator(login_required(), name='dispatch')
 class TransaksiViews(View):
     def get(self, request):
         rekening = Rekening.objects.filter(akun=request.user).first()
 
-        # Ambil semua transaksi yang terkait dengan rekening user
-        transaksi = Transaksi.objects.filter(rek=rekening).order_by('-created_at') if rekening else []
-        data ={
-            'transaksi' : transaksi,
-            }
+        transaksi = []
+        if rekening:  # Hanya jalankan query jika rekening ditemukan
+            transaksi = Transaksi.objects.filter(rek=rekening, deleted_at__isnull=True).order_by('-created_at')
+
+        data = {
+            'transaksi': transaksi,
+        }
         return render(request, 'transaksi/transaksi.html',data)
 
 def to_float(value):
@@ -23,19 +29,19 @@ def to_float(value):
     except (ValueError, TypeError):
         return 0
 #create transaksi
+@method_decorator(login_required(), name='dispatch')
 class TransCreateViews(View):
-    def get(self, request):
-        data = {
-            'edit': False,
-        }
-        return render(request, 'user/userview.html', data)
     def post(self, request):
         frm_saldo_keluar = to_float(request.POST.get("saldo_keluar", "0"))
         frm_saldo_masuk = to_float(request.POST.get("saldo_masuk", "0"))
-        frm_jenis = request.POST.get('jenis')
-        frm_tujuan = request.POST.get('tujuan')
-        frm_ewallet = request.POST.get('ewallet')
-        frm_bank = request.POST.get('bank')
+        frm_jenis = request.POST.get('jenis_transaksi')
+        frm_tujuan = request.POST.get('tujuan_transaksi')
+        frm_ewallet = request.POST.get('ewalle_tujuan')
+        frm_bank = request.POST.get('bank_tujuan')
+        frm_golongan = request.POST.get('golongan')
+        print(frm_tujuan)
+        print(frm_saldo_keluar)
+        print(frm_jenis)
 
         try:
             rekening = Rekening.objects.filter(akun=request.user).first()
@@ -55,8 +61,18 @@ class TransCreateViews(View):
                             data_transaksi["tujuan"] = frm_bank
                     elif frm_jenis == "tarik_tunai":
                         data_transaksi["saldo_keluar"] = frm_saldo_keluar
-                    else:
+                    elif frm_jenis == "tiket_ferizy":
+                        data_transaksi["saldo_keluar"] = frm_saldo_keluar
+                        if frm_tujuan == "kendaraan":
+                            data_transaksi["tujuan"] = frm_golongan
+                        else:
+                            data_transaksi["tujuan"] = frm_tujuan
+                    elif frm_jenis == "isi_saldo":
+                        data_transaksi["tujuan"] = "Rekening"
                         data_transaksi["saldo_masuk"] = frm_saldo_masuk
+                    else:
+                        messages.error(request, "Data Tidak boleh kosong, Gagal menambahkan Transaksi")
+                        return redirect('app:index_transaksi')
 
                     # Simpan transaksi ke database
                     Transaksi.objects.create(**data_transaksi)
@@ -68,62 +84,26 @@ class TransCreateViews(View):
             messages.error(request, "Gagal menambahkan Transaksi")
             return redirect('app:index_transaksi')
         
- #Edit Data       
-class EditViews(View):
-    def get(self, request, id_akun):
-        try:
-            akun = Master_User.objects.get(user_id=id_akun)
-            data = {
-                'akun_id': id_akun,
-                'akun': akun,
-            }
-            return render(request, 'user/userview.html', data)
-        except Master_User.DoesNotExist:
-            messages.error(request, "Akun tidak ditemukan")
-            return redirect('app:index_user')
-    def post(self, request,  id_akun):
-        frm_nama_lengkap = request.POST.get('full_name')
-        frm_username = request.POST.get('username')
-        frm_email = request.POST.get('email')
-        frm_phone = request.POST.get('phone')
-        frm_password = request.POST.get('password')
-
-        try:
-            
-            with transaction.atomic():
-                akun = Master_User.objects.get(user_id=id_akun)
-                akun.full_name = frm_nama_lengkap
-                akun.username = frm_username
-                akun.email = frm_email
-                akun.phone = frm_phone
-
-
-                # Hanya set password jika password diinput
-                if frm_password:
-                    akun.set_password(frm_password)
-
-                akun.save()
-
-                messages.success(request, "Akun berhasil diubah")
-                return redirect('app:index_user')
-
-        except Master_User.DoesNotExist:
-            messages.error(request, "Akun tidak ditemukan")
-            return redirect('app:index_user')
-
-        except Exception as e:
-            print('Error:', e)
-            messages.error(request, "Gagal mengubah akun")
-            return redirect('app:index_user')
-        
-class TransHapusViews(View):
+ #Edit Data
+@method_decorator(login_required(), name='dispatch')      
+class TransEditViews(View):
     def get(self, request, id_trans):
         try:
-            trans = Rekening.objects.get(trans_id=id_trans)
-            trans.deleted_at = timezone.now() #bikin arsip data, filter by deleted_at nya
-            trans.save() 
-            # trans.delete()
-            messages.success(request, f"Transaksi berhasil dihapus")
-        except Master_User.DoesNotExist:
+            transaksi = Transaksi.objects.get(trans_id=id_trans)
+            data = {
+                'trans_id': id_trans,
+                'transaksi' : transaksi,
+            }
+            return render(request, 'transaksi/transaksi.html', data)     
+        except Transaksi.DoesNotExist:
             messages.error(request, "Transaksi tidak ditemukan")
+            return redirect('app:index_transaksi')
+        
+@method_decorator(login_required(), name='dispatch')       
+class TransHapusViews(View):
+    def get(self, request, id_trans):
+        trans = get_object_or_404(Transaksi, trans_id=id_trans)
+        trans.deleted_at = timezone.now()  # Tandai sebagai dihapus
+        trans.save()  # Jalankan logika soft delete
+        messages.success(request, "Transaksi berhasil dibatalkan.")
         return redirect('app:index_transaksi')

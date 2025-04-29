@@ -4,8 +4,10 @@ from brilink_app.models import Rekening, Master_User
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
-
+@method_decorator(login_required(), name='dispatch')
 class RekViews(View):
     def get(self, request):
         rekening = Rekening.objects.all()
@@ -14,7 +16,7 @@ class RekViews(View):
             }
         return render(request, 'home/index_home.html',data)
 
-#create rek
+@method_decorator(login_required(), name='dispatch')
 class RekCreateViews(View):
     def post(self, request):
         frm_id_pemilik = request.POST.get('id_pemilik')

@@ -71,29 +71,62 @@
 								<form class="login100-form validate-form" method="POST">
 									{% csrf_token %}
 									<span class="login100-form-title">
-										Login
+										Registration
 									</span>
-									<div class="wrap-input100 validate-input" data-bs-validate = "Valid email is required: ex@abc.xyz">
-										<input class="input100" type="text" name="email" placeholder="Email or Username" required />
+								
+									<!-- Nama Lengkap -->
+									<div class="wrap-input100 validate-input" data-bs-validate="Nama lengkap harus diisi">
+										<input class="input100" type="text" name="full_name" placeholder="Full Name">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="mdi mdi-account" aria-hidden="true"></i>
+										</span>
+									</div>
+								
+									<!-- Username -->
+									<div class="wrap-input100 validate-input" data-bs-validate="Username harus diisi">
+										<input class="input100" type="text" name="username" placeholder="Username">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="mdi mdi-account-box" aria-hidden="true"></i>
+										</span>
+									</div>
+								
+									<!-- Email -->
+									<div class="wrap-input100 validate-input" data-bs-validate="Valid email is required: ex@abc.xyz">
+										<input class="input100" type="email" name="email" placeholder="Email">
 										<span class="focus-input100"></span>
 										<span class="symbol-input100">
 											<i class="zmdi zmdi-email" aria-hidden="true"></i>
 										</span>
 									</div>
-									<div class="wrap-input100 validate-input" data-bs-validate = "Password is required">
-										<input class="input100" type="password" name="password" placeholder="Password" required>
+								
+									<!-- Phone -->
+									<div class="wrap-input100 validate-input" data-bs-validate="Phone number is required">
+										<input class="input100" type="text" name="phone" placeholder="Phone Number">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="mdi mdi-phone" aria-hidden="true"></i>
+										</span>
+									</div>
+								
+									<!-- Password -->
+									<div class="wrap-input100 validate-input" data-bs-validate="Password is required">
+										<input class="input100" type="password" name="password" placeholder="Password">
 										<span class="focus-input100"></span>
 										<span class="symbol-input100">
 											<i class="zmdi zmdi-lock" aria-hidden="true"></i>
 										</span>
 									</div>
+								
 									<div class="container-login100-form-btn">
-										<button href="#" class="login100-form-btn btn-primary" type="submit">
-											Login
+										<button type="submit" class="login100-form-btn btn-primary">
+											Register
 										</button>
 									</div>
+								
 									<div class="text-center pt-3">
-										<p class="text-dark mb-0">Tidak Punya Akun?<a href="{% url "app:register" %}" class="text-primary ms-1">Buat Akun Disini.</a></p>
+										<p class="text-dark mb-0">Already have an account? <a href="{% url "app:login_page" %}" class="text-primary ms-1">Sign In</a></p>
 									</div>
 								</form>
 							</div>

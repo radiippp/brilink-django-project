@@ -43,6 +43,47 @@
 		<!-- COLOR SKIN CSS -->
 		<link id="theme" rel="stylesheet" type="text/css" media="all" href="{% static 'colors/color1.css'%}" />
 
+        <script>
+			let countdown = 600; // 10 menit
+			let resendCountdown = 10; // 10 detik untuk aktifkan tombol resend
+		
+			function startCountdown() {
+				const timer = document.getElementById("timer");
+				const resendBtn = document.getElementById("resendBtn");
+		
+				// Mulai timer utama 10 menit
+				const interval = setInterval(() => {
+					const minutes = Math.floor(countdown / 60);
+					const seconds = countdown % 60;
+					timer.innerText = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+					countdown--;
+		
+					if (countdown < 0) {
+						clearInterval(interval);
+						timer.innerText = "Expired";
+					}
+				}, 1000);
+		
+				// Mulai timer tombol resend (10 detik)
+				resendBtn.disabled = true;
+				resendBtn.innerText = `Kirim OTP Ulang (${resendCountdown})`;
+		
+				const resendInterval = setInterval(() => {
+					resendCountdown--;
+					resendBtn.innerText = `Kirim OTP Ulang (${resendCountdown})`;
+		
+					if (resendCountdown <= 0) {
+						clearInterval(resendInterval);
+						resendBtn.disabled = false;
+						resendBtn.innerText = "Kirim OTP Ulang";
+					}
+				}, 1000);
+			}
+		
+			window.onload = startCountdown;
+		</script>
+		
+
 	</head>
 
 	<body>
@@ -68,34 +109,26 @@
 					<div class="container-login100">
 						<div class="wrap-login100 p-0">
 							<div class="card-body">
-								<form class="login100-form validate-form" method="POST">
-									{% csrf_token %}
-									<span class="login100-form-title">
-										Login
-									</span>
-									<div class="wrap-input100 validate-input" data-bs-validate = "Valid email is required: ex@abc.xyz">
-										<input class="input100" type="text" name="email" placeholder="Email or Username" required />
-										<span class="focus-input100"></span>
-										<span class="symbol-input100">
-											<i class="zmdi zmdi-email" aria-hidden="true"></i>
-										</span>
-									</div>
-									<div class="wrap-input100 validate-input" data-bs-validate = "Password is required">
-										<input class="input100" type="password" name="password" placeholder="Password" required>
-										<span class="focus-input100"></span>
-										<span class="symbol-input100">
-											<i class="zmdi zmdi-lock" aria-hidden="true"></i>
-										</span>
-									</div>
-									<div class="container-login100-form-btn">
-										<button href="#" class="login100-form-btn btn-primary" type="submit">
-											Login
-										</button>
-									</div>
-									<div class="text-center pt-3">
-										<p class="text-dark mb-0">Tidak Punya Akun?<a href="{% url "app:register" %}" class="text-primary ms-1">Buat Akun Disini.</a></p>
-									</div>
-								</form>
+                                <h2>Verifikasi OTP</h2>
+    <p>Kode OTP telah dikirim ke email Anda. Berlaku selama <span id="timer">10:00</span></p>
+                                    <form class="login100-form validate-form" method="post">
+                                        {% csrf_token %}
+                                        <input type="text" name="otp" placeholder="Masukkan OTP" required>
+                                        <button type="submit">Verifikasi</button>
+                                    </form>
+                                
+                                    <form method="post" action="{% url 'app:resend_otp' %}" id="resendForm">
+										{% csrf_token %}
+										<input type="hidden" name="email" value="{{ request.session.pending_user_email }}">
+										<button type="submit" id="resendBtn" disabled>Kirim OTP Ulang (10)</button>
+									</form>
+                                    {% if messages %}
+										<ul>
+											{% for message in messages %}
+												<li>{{ message }}</li>
+											{% endfor %}
+										</ul>
+									{% endif %}
 							</div>
 						</div>
 					</div>

@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 @method_decorator(login_required(), name='dispatch')
 class UserViews(View):
     def get(self, request):
-        user = Master_User.objects.filter(deleted_at__isnull=True)
+        user = Master_User.objects.all() #filter(deleted_at__isnull=True)
         data ={
             'user' : user,
             }
@@ -106,9 +106,19 @@ class HapusViews(View):
     def get(self, request, id_akun):
         try:
             akun = Master_User.objects.get(user_id=id_akun)
-            akun.deleted_at = timezone.now() #bikin arsip data, filter by deleted_at nya
-            akun.save() 
-            # akun.delete()
+            # akun.deleted_at = timezone.now() #bikin arsip data, filter by deleted_at nya
+            # akun.save() 
+            akun.delete()
+            messages.success(request, f"{akun.full_name} berhasil dihapus")
+        except Master_User.DoesNotExist:
+            messages.error(request, "Akun tidak ditemukan")
+        return redirect('app:index_user')
+@method_decorator(login_required(), name='dispatch')        
+class PermanenHapusViews(View):
+    def get(self, request, id_akun):
+        try:
+            akun = Master_User.objects.get(user_id=id_akun) 
+            akun.delete()
             messages.success(request, f"{akun.full_name} berhasil dihapus")
         except Master_User.DoesNotExist:
             messages.error(request, "Akun tidak ditemukan")
