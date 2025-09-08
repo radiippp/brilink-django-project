@@ -7,8 +7,6 @@ urlpatterns = [
     path('login/', auth.LoginViews.as_view(), name='login_page'),
     path('logout/', auth.LogoutViews.as_view(), name='logout_page'),
     path('registration/', auth.RegisterView.as_view(), name='register'),
-    path('otp-verification/', auth.OTPVerifyView.as_view(), name='otp_verification'),
-    path('resend-otp/', auth.ResendOTPView.as_view(), name='resend_otp'),
 
 
     path('', home.HomeViews.as_view(), name='index_home'),
@@ -21,11 +19,11 @@ urlpatterns = [
        path('profile/<str:id_akun>/', user_list.ProfileViews.as_view(), name='profile_user'),
        ])),
 
-    path('rekening/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
-    path('transaksi/', include([
-        path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
-        path('tambah/',transaksi.TransCreateViews.as_view(), name='tambah_transaksi'),
-        path('hapus/<str:id_trans>/',transaksi.TransHapusViews.as_view(), name='hapus_transaksi'),
-    ]))
+    # path('rekening/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
+    # path('transaksi/', include([
+    #     path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
+    #     path('tambah/',transaksi.TransCreateViews.as_view(), name='tambah_transaksi'),
+    #     path('hapus/<str:id_trans>/',transaksi.TransHapusViews.as_view(), name='hapus_transaksi'),
+    # ]))
     
 ]

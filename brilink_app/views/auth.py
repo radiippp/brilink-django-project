@@ -79,12 +79,11 @@ class RegisterView(View):
         full_name = request.POST.get('full_name')
         phone = request.POST.get('phone')
         password = request.POST.get('password')
+        role = request.POST.get('role')
 
         if m_user.objects.filter(email=email).exists():
             messages.error(request, "Email sudah terdaftar.")
             return redirect('app:register')
-
-        otp = str(random.randint(100000, 999999))
 
         user = m_user.objects.create_user(
             email=email,
@@ -92,83 +91,44 @@ class RegisterView(View):
             full_name=full_name,
             phone=phone,
             password=password,
-            is_active=False,
-            email_verification_token=otp,
-            otp_created_at=timezone.now()
+            role=role,
+            is_active=True,   
         )
-
-        send_mail(
-            'Kode OTP Verifikasi',
-            f'Kode OTP Anda adalah {otp}. Berlaku selama 10 menit.',
-            'noreply@yourdomain.com',
-            [email],
-            fail_silently=False,
-        )
-
-        request.session['pending_user_email'] = email
-        return redirect('app:otp_verification')
+        messages.success(request, "Akun berhasil didaftarkan. Silakan login.")
+        return redirect('app:login_page')
         
-class OTPVerifyView(View):
-    def get(self, request):
-        return render(request, 'auth/otp_verification.html')
+# class OTPVerifyView(View):
+#     def get(self, request):
+#         return render(request, 'auth/otp_verification.html')
 
-    def post(self, request):
-        otp_input = request.POST.get('otp')
-        email = request.session.get('pending_user_email')
+#     def post(self, request):
+#         otp_input = request.POST.get('otp')
+#         email = request.session.get('pending_user_email')
 
-        try:
-            user = m_user.objects.get(email=email, is_active=False)
-        except m_user.DoesNotExist:
-            messages.error(request, "Akun tidak ditemukan.")
-            return redirect('app:register')
+#         try:
+#             user = m_user.objects.get(email=email, is_active=False)
+#         except m_user.DoesNotExist:
+#             messages.error(request, "Akun tidak ditemukan.")
+#             return redirect('app:register')
 
-        if not user.email_verification_token or not user.otp_created_at:
-            messages.error(request, "OTP tidak ditemukan.")
-            return redirect('app:otp_verification')
+#         if not user.email_verification_token or not user.otp_created_at:
+#             messages.error(request, "OTP tidak ditemukan.")
+#             return redirect('app:otp_verification')
 
-        if (timezone.now() - user.otp_created_at).total_seconds() > 600:
-            messages.error(request, "OTP sudah kedaluwarsa.")
-            return redirect('app:otp_verification')
+#         if (timezone.now() - user.otp_created_at).total_seconds() > 600:
+#             messages.error(request, "OTP sudah kedaluwarsa.")
+#             return redirect('app:otp_verification')
 
-        if otp_input == user.email_verification_token:
-            user.is_active = True
-            user.email_verification_token = None
-            user.otp_created_at = None
-            user.save()
-            messages.success(request, "Akun berhasil diverifikasi. Silakan login.")
-            return redirect('app:login_page')
-        else:
-            messages.error(request, "OTP salah.")
-            return redirect('app:otp_verification')
-        
-class ResendOTPView(View):
-    def post(self, request):
-        email = request.POST.get('email')
-
-        try:
-            user = m_user.objects.get(email=email, is_active=False)
-        except m_user.DoesNotExist:
-            messages.error(request, "Akun tidak ditemukan.")
-            return redirect('app:register')
-
-        # Generate OTP baru
-        new_otp = random.randint(100000, 999999)
-        user.email_verification_token = str(new_otp)
-        user.otp_created_at = timezone.now()
-        user.save()
-
-        # Kirim email OTP baru
-        send_mail(
-            'Kode OTP Baru',
-            f'Kode OTP Anda adalah {new_otp}. Berlaku selama 10 menit.',
-            'noreply@yourdomain.com',
-            [email],
-            fail_silently=False,
-        )
-
-        request.session['pending_user_email'] = email
-        messages.success(request, "OTP baru telah dikirim ke email.")
-        return redirect('app:otp_verification')
+#         if otp_input == user.email_verification_token:
+#             user.is_active = True
+#             user.email_verification_token = None
+#             user.otp_created_at = None
+#             user.save()
+#             messages.success(request, "Akun berhasil diverifikasi. Silakan login.")
+#             return redirect('app:login_page')
+#         else:
+#             messages.error(request, "OTP salah.")
+#             return redirect('app:otp_verification')
 
 
 @method_decorator(login_required(), name='dispatch')

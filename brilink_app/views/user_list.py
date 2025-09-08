@@ -13,7 +13,12 @@ from django.contrib.auth.decorators import login_required
 @method_decorator(login_required(), name='dispatch')
 class UserViews(View):
     def get(self, request):
-        user = Master_User.objects.all() #filter(deleted_at__isnull=True)
+        if hasattr(request.user, "role") and request.user.role == "developer":
+            user = Master_User.objects.all()
+        elif request.user.role == "admin":
+            user = Master_User.objects.filter(created_by=request.user.user_id)
+        else:
+            user = Master_User.objects.none()
         data ={
             'user' : user,
             }
@@ -33,6 +38,8 @@ class CreateViews(View):
         frm_email = request.POST.get('email')
         frm_phone = request.POST.get('phone')
         frm_password = request.POST.get('password')
+        frm_created_by = request.POST.get('created_by')
+        frm_role = request.POST.get('role')
 
         try:
             
@@ -43,6 +50,8 @@ class CreateViews(View):
                     phone=frm_phone,
                     password=frm_password,
                     full_name=frm_nama_lengkap,
+                    role=frm_role,
+                    created_by = frm_created_by
                 )
                 messages.success(request, f"Akun berhasil ditambahkan")
                 return redirect('app:index_user')

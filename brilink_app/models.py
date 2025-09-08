@@ -68,6 +68,7 @@ class Master_UserManager(BaseUserManager):
 ROLE_CHOICES = [
     ('developer', 'Developer'),
     ('admin', 'Admin'),
+    ('staff', 'Staff'),
     ]
     
 """TABEL AKUN UNTUK SELAIN BAWAANNYA DJANGO YANG DIPAKAI"""
@@ -89,6 +90,7 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='admin')
     email_verification_token = models.CharField(max_length=6, blank=True, null=True)
     otp_created_at = models.DateTimeField(blank=True, null=True)
+    created_by = models.CharField(max_length=255, blank=True, null=True)
     
     objects = Master_UserManager()
 
@@ -101,99 +103,5 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
     def get_short_name(self):
         return self.first_name
     
-
-class Rekening(CreateUpdateTime):
-    rek_id = models.TextField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    akun = models.ForeignKey(Master_User, on_delete=models.RESTRICT)
-    saldo = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
-    def total_saldo_masuk(self):
-        return self.transaksi.filter(deleted_at__isnull=True).aggregate(
-            total=models.Sum('saldo_masuk')
-        )['total'] or 0
-
-    def total_saldo_keluar(self):
-        return self.transaksi.filter(deleted_at__isnull=True).aggregate(
-            total=models.Sum('saldo_keluar')
-        )['total'] or 0
-
-
-TRANSACTION_TYPE = [
-    ('transfer', 'Transfer'),
-    ('tarik_tunai', 'Tarik Tunai'),
-    ('isi_saldo', 'Isi Saldo'),
-    ('top_up', 'Top Up'),
-    ('tiket_ferizy', 'Tiket Ferizy'),
-]
-
-class Transaksi(CreateUpdateTime):
-    trans_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    rek = models.ForeignKey(Rekening, on_delete=models.RESTRICT, related_name='transaksi')
-    saldo_keluar = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    saldo_masuk = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    jenis = models.CharField(max_length=50, choices=TRANSACTION_TYPE, default='transfer')
-    tujuan = models.CharField(max_length=50, null=True)
-
-    def __str__(self):
-        return f"{self.jenis} - {self.trans_id}"
-
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None  # Apakah transaksi baru?
-        old_instance = None
-
-        if not is_new:
-            try:
-                old_instance = Transaksi.objects.get(pk=self.pk)
-            except Transaksi.DoesNotExist:
-                old_instance = None
-
-        # Jika transaksi dihapus (soft delete), saldo dikembalikan
-        if self.deleted_at:
-            if old_instance:
-                if old_instance.saldo_masuk and old_instance.saldo_masuk > 0:
-                    self.rek.saldo -= Decimal(str(old_instance.saldo_masuk))
-                if old_instance.saldo_keluar and old_instance.saldo_keluar > 0:
-                    self.rek.saldo += Decimal(str(old_instance.saldo_keluar))
-                self.rek.save()
-            super().save(*args, **kwargs)
-            return  # Hentikan proses agar saldo tidak diproses lagi
-
-        # Jika transaksi baru, tambahkan saldo
-        if is_new:
-            if self.saldo_masuk and self.saldo_masuk > 0:
-                self.rek.saldo += Decimal(str(self.saldo_masuk))
-            if self.saldo_keluar and self.saldo_keluar > 0:
-                self.rek.saldo -= Decimal(str(self.saldo_keluar))
-        else:
-            # Kembalikan saldo sebelum transaksi diperbarui
-            if old_instance:
-                if old_instance.saldo_masuk and old_instance.saldo_masuk > 0:
-                    self.rek.saldo -= Decimal(str(old_instance.saldo_masuk))
-                if old_instance.saldo_keluar and old_instance.saldo_keluar > 0:
-                    self.rek.saldo += Decimal(str(old_instance.saldo_keluar))
-
-            # Terapkan nilai saldo yang baru
-            if self.saldo_masuk and self.saldo_masuk > 0:
-                self.rek.saldo += Decimal(str(self.saldo_masuk))
-            if self.saldo_keluar and self.saldo_keluar > 0:
-                self.rek.saldo -= Decimal(str(self.saldo_keluar))
-
-        self.rek.save()
-        super().save(*args, **kwargs)
-
-    def aktif(cls, user):
-        """Query hanya transaksi yang belum dihapus dan milik akun tertentu"""
-        rekening = Rekening.objects.filter(akun=user).first()
-        if rekening:
-            return cls.objects.filter(rek=rekening, deleted_at__isnull=True).order_by('-created_at')
-        return cls.objects.none()
-
-    # def restore(self):
-    #     """Mengembalikan transaksi yang telah dihapus"""
-    #     if self.deleted_at:
-    #         self.deleted_at = None
-    #         self.save()
-
-
-
     
 

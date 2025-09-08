@@ -301,7 +301,7 @@
 					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form action="{% url 'app:tambah_rekening' %}" method="post" onsubmit="return validateSaldo()">
+						<form action="#" method="post" onsubmit="return validateSaldo()">
 							{% csrf_token %}
 							<div class="mb-3">
 								<label for="saldo_awal" class="form-label">Masukkan Saldo Awal</label>
@@ -327,7 +327,7 @@
 					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form action="{% url 'app:tambah_transaksi' %}" method="post" onsubmit="return validateSaldo()">
+						<form action="#" method="post" onsubmit="return validateSaldo()">
 							{% csrf_token %}
 							<div class="mb-3">
 								<label for="saldo_awal" class="form-label">Masukkan Saldo</label>
@@ -355,7 +355,7 @@
 					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-					  <form action="{% url 'app:tambah_transaksi' %}" method="post">
+					  <form action="#" method="post">
 						{% csrf_token %}
 						<!-- Pilihan Jenis Transaksi -->
 						<div class="mb-3">

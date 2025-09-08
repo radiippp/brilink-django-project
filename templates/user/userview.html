@@ -130,9 +130,13 @@
 								  <select class="form-select form-select-solid" name="role" id="role" required>
 									<option disabled selected value>-- select an option --</option>
 									<option value="admin">Admin</option>
-									<option value="teller">Teller</option>
+									<option value="staff">Staff</option>
 								  </select>
 								</div>
+								{% endif %}
+								{% if request.user.role == 'admin' %}
+								<input type="hidden" name="role" class="form-control" id="role" value="staff" required />
+								<input type="hidden" name="created_by" class="form-control" id="role" value={{request.user.user_id}} required />
 								{% endif %}
 								<div class="mb-3">
 								  <label for="password" class="form-label">Password</label>
