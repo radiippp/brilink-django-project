@@ -8,13 +8,14 @@
 									<li class="breadcrumb-item active" aria-current="page">Dashboard 01</li>
 								</ol>
 							</div>
-							{% if rekening_exists %}
+							{% if rekening_list %}
+								{% if request.user.role == 'admin' or request.user.role == 'developer' %}
 								<!-- Jika user punya rekening -->
 								<div class="ms-auto pageheader-btn">
-									<a href="#" data-bs-target="#modaldemo2" data-bs-toggle="modal" class="btn btn-primary btn-icon text-white me-2">
+									<a href="#" data-bs-target="#modaldemo1" data-bs-toggle="modal" class="btn btn-warning btn-icon text-white">
 										<span>
 											<i class="fe fe-plus"></i>
-										</span> Isi Saldo
+										</span> Tambah Rekening
 									</a>
 									<a href="#" data-bs-target="#modaldemo3" data-bs-toggle="modal" class="btn btn-success btn-icon text-white">
 										<span>
@@ -22,15 +23,26 @@
 										</span> Tambah Transaksi
 									</a>
 								</div>
-							{% else %}
-								<!-- Jika user belum punya rekening -->
+								{% else %}
 								<div class="ms-auto pageheader-btn">
-									<a href="#" data-bs-target="#modaldemo1" data-bs-toggle="modal" class="btn btn-warning btn-icon text-white">
+									<a href="#" data-bs-target="#modaldemo3" data-bs-toggle="modal" class="btn btn-success btn-icon text-white">
 										<span>
-											<i class="fe fe-plus"></i>
-										</span> Tambah Rekening
+											<i class="fe fe-log-in"></i>
+										</span> Tambah Transaksi
 									</a>
 								</div>
+								{% endif %}
+							{% else %}
+								{% if request.user.role == 'admin' or request.user.role == 'developer' %}
+									<!-- Jika user belum punya rekening -->
+									<div class="ms-auto pageheader-btn">
+										<a href="#" data-bs-target="#modaldemo1" data-bs-toggle="modal" class="btn btn-warning btn-icon text-white">
+											<span>
+												<i class="fe fe-plus"></i>
+											</span> Tambah Rekening
+										</a>
+									</div>
+								{% endif %}
 							{% endif %}
 
 						</div>
@@ -38,72 +50,46 @@
 
 						<!-- ROW-1 -->
 						<div class="row">
-							
-                            <div class="col-lg-4 col-md-12 col-sm-12">
-                                <div class="card overflow-hidden">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col">
-                                                <h6 class="">Saldo Anda</h6>
-												{% if rekening_exists %}
-                                                <h3 class="mb-2 number-font">Rp {{rekening.saldo|intcomma }}</h3>
-												{% else %}
-    											<p class="mb-2 number-font">Anda belum memiliki rekening.</p>
-												{% endif %}
-                                            </div>
-                                            <div class="col col-auto">
-												<div class="counter-icon bg-primary-gradient box-shadow-primary brround ms-auto">
-												  <i class="fe fe-trending-up text-white mb-5"></i>
+							{% if rekening_list %}
+								{% for rek in rekening_list %}
+								<div class="col-lg-4 col-md-6 col-sm-12">
+									<div class="card overflow-hidden mb-3">
+										<div class="card-body">
+											<div class="row">
+												<div class="col">
+													<h5 class="fw-bold text-primary">{{ rek.nama_rek }}</h5>
+													<h3 class="mb-2 number-font">Rp {{ rek.saldo|intcomma }}</h3>
 												</div>
-											  </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-							
-                            <div class="col-lg-4 col-md-12 col-sm-12">
-                                <div class="card overflow-hidden">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col">
-                                                <h6 class="">Saldo Masuk</h6>
-                                                {% if rekening_exists %}
-                                                <h3 class="mb-2 number-font">Rp {{total_masuk|intcomma }}</h3>
-												{% else %}
-    											<p class="mb-2 number-font">Anda belum memiliki rekening.</p>
-												{% endif %}
-                                            </div>
-                                            <div class="col col-auto">
-                                                <div class="counter-icon bg-danger-gradient box-shadow-danger brround ms-auto">
-                                                    <i class="icon icon-rocket text-white mb-5 "></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-12 col-sm-12">
-                                <div class="card overflow-hidden">
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col">
-                                                <h6 class="">Saldo Keluar</h6>
-                                                {% if rekening_exists %}
-                                                <h3 class="mb-2 number-font">Rp {{total_keluar|intcomma }}</h3>
-												{% else %}
-    											<p class="mb-2 number-font">Anda belum memiliki rekening.</p>
-												{% endif %}
-                                            </div>
-                                            <div class="col col-auto">
-                                                <div class="counter-icon bg-secondary-gradient box-shadow-secondary brround ms-auto">
-                                                    <i class="fe fe-dollar-sign text-white mb-5 "></i>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+												<div class="col col-auto">
+													<div class="counter-icon bg-primary-gradient box-shadow-primary brround ms-auto">
+														<i class="fe fe-credit-card text-white mb-5"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								{% endfor %}
+							{% else %}
+								{% if request.user.role == 'admin' or request.user.role == 'developer' %}
+								<div class="col-12">
+									<div class="card mb-3">
+										<div class="card-body text-center">
+											<p class="mb-0">Anda belum memiliki rekening.</p>
+										</div>
+									</div>
+								</div>
+								{% else %}
+								<div class="col-12">
+									<div class="card mb-3">
+										<div class="card-body text-center">
+											<p class="mb-0">Admin belum memiliki rekening.</p>
+										</div>
+									</div>
+								</div>
+								{% endif %}
+							{% endif %}
+						</div>
                         
 						
 						<!-- ROW-1 END -->
@@ -301,42 +287,17 @@
 					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
-						<form action="#" method="post" onsubmit="return validateSaldo()">
+						<form action="{% url 'app:tambah_rekening' %}" method="post" onsubmit="return validateSaldo()">
 							{% csrf_token %}
+							<div class="mb-3">
+								<label for="nama_rek" class="form-label">Nama Rekening</label>
+								<input type="text" name="nama_rek" class="form-control" id="nama_rek" list="listRekening" placeholder="Contoh: BRI, BNI, Dana, Gopay" required />
 							<div class="mb-3">
 								<label for="saldo_awal" class="form-label">Masukkan Saldo Awal</label>
 								<input type="number" name="saldo_awal" class="form-control" id="saldo_awal" min="0" required />
 								<small>Pastikan Input Dengan Angka</small>
 							</div>
 							<input type="hidden" name="id_pemilik" class="form-control" id="id_pemilik" value="{{ request.user.user_id }}" required />
-							<div class="modal-footer">
-								<button type="submit" class="btn btn-primary">Save changes</button>
-								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							</div>
-						</form>
-					</div>
-				  </div>
-				</div>
-			  </div>
-
-			  <div class="modal fade" id="modaldemo2" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
-				<div class="modal-dialog" role="document">
-				  <div class="modal-content">
-					<div class="modal-header">
-					  <h5 class="modal-title" id="modaldemo1Label">Isi Saldo Rekening</h5>
-					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-						<form action="#" method="post" onsubmit="return validateSaldo()">
-							{% csrf_token %}
-							<div class="mb-3">
-								<label for="saldo_awal" class="form-label">Masukkan Saldo</label>
-								<input type="number" name="saldo_masuk" class="form-control" id="saldo_awal" min="0" required />
-								<small>Pastikan Input Dengan Angka</small>
-							</div>
-
-							<input type="hidden" name="tujuan" class="form-control"  value="Rekening" required />
-							<input type="hidden" name="jenis" class="form-control"  value="isi_saldo" required />
 							<div class="modal-footer">
 								<button type="submit" class="btn btn-primary">Save changes</button>
 								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

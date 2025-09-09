@@ -19,7 +19,11 @@ urlpatterns = [
        path('profile/<str:id_akun>/', user_list.ProfileViews.as_view(), name='profile_user'),
        ])),
 
-    # path('rekening/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
+    path('rekening/',include([
+        path('', rekening.RekViews.as_view(), name='index_rekening'),
+        path('tambah/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
+        path('hapus/<str:id_rek>/', rekening.RekHapusViews.as_view(), name='hapus_rekening'),
+    ]) ),
     # path('transaksi/', include([
     #     path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
     #     path('tambah/',transaksi.TransCreateViews.as_view(), name='tambah_transaksi'),

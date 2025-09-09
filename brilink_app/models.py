@@ -88,8 +88,6 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
     date_of_birth = models.DateField(blank=True, null=True)
     # avatar = models.ImageField(blank=True, null=True, upload_to='images/avatar/', default='images/avatar/default_avatar.png')
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='admin')
-    email_verification_token = models.CharField(max_length=6, blank=True, null=True)
-    otp_created_at = models.DateTimeField(blank=True, null=True)
     created_by = models.CharField(max_length=255, blank=True, null=True)
     
     objects = Master_UserManager()
@@ -102,6 +100,16 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
 
     def get_short_name(self):
         return self.first_name
+    
+
+class Rekening(CreateUpdateTime):
+    rek_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nama_rek = models.CharField(max_length=50)
+    saldo = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    pemilik = models.ForeignKey(Master_User, on_delete=models.CASCADE, related_name="rekening")
+
+    def __str__(self):
+        return f"{self.nama_rek} - {self.pemilik.full_name}"
     
     
 
