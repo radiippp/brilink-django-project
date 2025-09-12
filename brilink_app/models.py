@@ -112,4 +112,68 @@ class Rekening(CreateUpdateTime):
         return f"{self.nama_rek} - {self.pemilik.full_name}"
     
     
+class Barang(CreateUpdateTime):
+    barang_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    nama = models.CharField(max_length=100)
+    stok = models.IntegerField(default=0)
+    harga = models.DecimalField(max_digits=15, decimal_places=2)
+    pemilik = models.ForeignKey(Master_User, on_delete=models.CASCADE, related_name="barang", null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.nama} (stok: {self.stok})"
+    
+class Transaksi(CreateUpdateTime):
+    TRANSAKSI_CHOICES = (
+        ("transfer", "Transfer"),
+        ("barang", "Transaksi Barang"),
+    )
+
+    transaksi_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    jenis = models.CharField(max_length=10, choices=TRANSAKSI_CHOICES)
+
+    rekening_sumber = models.ForeignKey(
+        Rekening, on_delete=models.SET_NULL, null=True, blank=True, related_name="transaksi_keluar"
+    )
+    rekening_tujuan = models.ForeignKey(
+        Rekening, on_delete=models.CASCADE, related_name="transaksi_masuk"
+    )
+
+    jumlah = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    keterangan = models.TextField(blank=True, null=True)
+
+    # khusus untuk transaksi barang
+    barang = models.ForeignKey(Barang, on_delete=models.SET_NULL, null=True, blank=True)
+    qty = models.IntegerField(default=0)
+
+    def proses(self):
+        """Update saldo rekening & stok barang"""
+        if self.jenis == "transfer":
+            if not self.rekening_sumber:
+                raise ValueError("Transfer wajib punya rekening sumber")
+
+            # update saldo rekening
+            self.rekening_sumber.saldo -= self.jumlah
+            self.rekening_sumber.save()
+            self.rekening_tujuan.saldo += self.jumlah
+            self.rekening_tujuan.save()
+
+        elif self.jenis == "barang":
+            if not self.barang:
+                raise ValueError("Transaksi barang wajib punya barang")
+
+            total = self.barang.harga * self.qty
+            self.jumlah = total  # simpan total ke field jumlah
+
+            # update stok barang
+            if self.barang.stok < self.qty:
+                raise ValueError("Stok barang tidak mencukupi")
+            self.barang.stok -= self.qty
+            self.barang.save()
+
+            # update saldo rekening tujuan
+            self.rekening_tujuan.saldo += total
+            self.rekening_tujuan.save()
+
+        self.save()
+
 

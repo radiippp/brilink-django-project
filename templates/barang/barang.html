@@ -1,0 +1,189 @@
+{% extends "base/base.html" %} {% load static %} {% load humanize %}
+{% block title %} Barang {% endblock %}
+{% block main %}
+					<div class="side-app">
+						<div class="page-header">
+							<div>
+								<h1 class="page-title">Daftar Barang</h1>
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#">Barang</a></li>
+									<li class="breadcrumb-item active" aria-current="page">Daftar Barang</li>
+								</ol>
+							</div>
+                        </div>
+
+                        <div class="row row-sm">
+							<div class="col-lg-12">
+								<div class="card">
+									<div class="card-header">
+										<h3 class="card-title">Daftar Barang</h3>
+										<div class="ms-auto pageheader-btn">
+											<a href="#" data-bs-target="#modaldemo1" data-bs-toggle="modal" class="btn btn-success">Tambah data</a>
+										  </div>
+									</div>
+									<div class="card-body">
+										<div class="table-responsive">
+											<table class="table table-bordered text-nowrap border-bottom w-100" id="responsive-datatable">
+												<thead>
+													<tr>
+                                                        <th class="border-bottom-0">No</th>
+														<th class="border-bottom-0">Nama Barang</th>
+														<th class="border-bottom-0">Harga</th>
+                                                        <th class="border-bottom-0">Stok</th>
+														<th class="border-bottom-0">Action</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for dt_brg in barang %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>{{dt_brg.nama }}</td>
+                                                        <td>{{dt_brg.harga|intcomma }}</td>
+                                                        <td>{{dt_brg.stok }}</td>
+                                                        <td class="">
+															<a class="btn btn-primary btn-sm rounded-11 me-2" data-bs-target="#modaldemo2{{ dt_brg.barang_id }}" data-bs-toggle="modal" data-bs-placement="top"
+																title="Edit"><i><svg class="table-edit" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34c-.2-.2-.45-.29-.71-.29s-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41z"/></svg></i></a>
+															<a class="btn btn-success btn-sm rounded-11 me-2"
+																data-bs-toggle="modal"
+																data-bs-target="#modalTambahStok{{ dt_brg.barang_id }}"
+																data-bs-placement="top"
+																title="Tambah Stok">
+																	<i>
+																		<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16">
+																			<path d="M0 0h24v24H0V0z" fill="none"/>
+																			<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+																		</svg>
+																	</i>
+																</a>
+
+															<a class="btn btn-danger btn-sm rounded-11" data-bs-toggle="tooltip" data-bs-original-title="Delete" href="{% url 'app:hapus_barang' id_brg=dt_brg.barang_id %}" data-message="Apakah Anda yakin ingin menghapus Akun ini?"><i><svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg></i></a>
+
+														</td>
+													</tr>
+                                                    <div class="modal fade" id="modaldemo2{{ dt_brg.barang_id }}" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                <h5 class="modal-title" id="modaldemo1Label">Edit Data Barang</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <form action="{% url 'app:edit_barang' id_barang=dt_brg.barang_id %}" method="post" onsubmit="return validateSaldo()">
+                                                                        {% csrf_token %}    
+                                                                        <div class="mb-3">
+																			<label for="nama_barang" class="form-label">Nama Barang</label>
+																			<input type="text" value="{{ dt_brg.nama }}" name="nama_barang" class="form-control" id="nama_barang" required />
+																		</div>
+																		<div class="mb-3">
+																			<label for="harga" class="form-label">Masukkan Harga</label>
+																			<input type="number" value="{{ dt_brg.harga }}" name="harga" class="form-control" id="harga" min="0" required />
+																			<small>Pastikan Input Dengan Angka</small>
+																		</div>
+																		<div class="mb-3">
+																			<label for="stok_awal" class="form-label">Masukkan Stok Awal</label>
+																			<input type="number" value="{{ dt_brg.stok }}" name="stok_awal" class="form-control" id="stok_awal" min="0" required />
+																			<small>Pastikan Input Dengan Angka</small>
+																		</div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="submit" class="btn btn-primary">Save changes</button>
+                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+													<div class="modal fade" id="modalTambahStok{{ dt_brg.barang_id }}" tabindex="-1" aria-labelledby="modalTambahStokLabel{{ dt_brg.barang_id }}" aria-hidden="true">
+														<div class="modal-dialog" role="document">
+															<div class="modal-content">
+
+																<div class="modal-header">
+																	<h5 class="modal-title" id="modalTambahStokLabel{{ dt_brg.barang_id }}">
+																		Tambah Stok untuk {{ dt_brg.nama }}
+																	</h5>
+																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+																</div>
+
+																<form action="{% url 'app:restok' id_barang=dt_brg.barang_id %}" method="post">
+																	{% csrf_token %}
+																	<div class="modal-body">
+																		<div class="mb-3">
+																			<label for="stok_baru{{ dt_brg.barang_id }}" class="form-label">Jumlah Stok Tambahan</label>
+																			<input type="number" class="form-control" id="stok_baru{{ dt_brg.barang_id }}" name="stok_baru" placeholder="Masukkan jumlah stok" min="1" required>
+																			<small>Masukkan angka stok yang ingin ditambahkan</small>
+																		</div>
+																	</div>
+																	<div class="modal-footer">
+																		<button type="submit" class="btn btn-success">Tambah</button>
+																		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+																	</div>
+																</form>
+
+															</div>
+														</div>
+													</div>
+
+                                                    {% endfor %}
+												</tbody>
+											</table>
+										</div>
+                                    </div>
+								</div>
+							</div>
+						</div>
+                    </div>
+
+                <div class="modal fade" id="modaldemo1" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+				  <div class="modal-content">
+					<div class="modal-header">
+					  <h5 class="modal-title" id="modaldemo1Label">Tambah Barang</h5>
+					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form action="{% url 'app:tambah_barang' %}" method="post" onsubmit="return validateSaldo()">
+							{% csrf_token %}
+							<div class="mb-3">
+								<label for="nama_barang" class="form-label">Nama Barang</label>
+								<input type="text" name="nama_barang" class="form-control" id="nama_barang" required />
+							</div>
+                            <div class="mb-3">
+								<label for="harga" class="form-label">Masukkan Harga</label>
+								<input type="number" name="harga" class="form-control" id="harga" min="0" required />
+								<small>Pastikan Input Dengan Angka</small>
+							</div>
+                            <div class="mb-3">
+								<label for="stok_awal" class="form-label">Masukkan Stok Awal</label>
+								<input type="number" name="stok_awal" class="form-control" id="stok_awal" min="0" required />
+								<small>Pastikan Input Dengan Angka</small>
+							</div>
+							<input type="hidden" name="id_pemilik" class="form-control" id="id_pemilik" value="{{ request.user.user_id }}" required />
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-primary">Save changes</button>
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							</div>
+						</form>
+					</div>
+				  </div>
+				</div>
+			  </div>
+
+              
+<script>
+	function validateSaldo() {
+	let stok = document.getElementById("stok_awal").value;
+    let harga = document.getElementById("harga").value;
+	let stokplus =
+	if (isNaN(stok) || stok < 0) {
+		alert("stok hanya boleh berupa angka positif!");
+		return false;
+		}
+    else if ( isNaN(harga) || harga < 0)){
+		alert("harga hanya boleh berupa angka positif!");
+		return false;
+		}
+	return true;
+	}
+</script>
+
+{% endblock %}

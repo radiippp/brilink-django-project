@@ -24,6 +24,14 @@ urlpatterns = [
         path('tambah/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
         path('hapus/<str:id_rek>/', rekening.RekHapusViews.as_view(), name='hapus_rekening'),
     ]) ),
+
+    path('barang/',include([
+        path('', barang.BarangViews.as_view(), name='index_barang'),
+        path('tambah/', barang.BarangCreateViews.as_view(), name='tambah_barang'),
+        path('edit/<str:id_barang>/', barang.BarangEditViews.as_view(), name='edit_barang'),
+        path('hapus/<str:id_brg>/', barang.BarangHapusViews.as_view(), name='hapus_barang'),
+        path('restok/<str:id_barang>/', barang.TambahStokViews.as_view(), name='restok'),
+    ]) ),
     # path('transaksi/', include([
     #     path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
     #     path('tambah/',transaksi.TransCreateViews.as_view(), name='tambah_transaksi'),
