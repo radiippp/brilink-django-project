@@ -1,392 +1,180 @@
-{% extends "base/base.html" %} {% load static %} {% load humanize %}
-{% block title %} Rekening {% endblock %}
-{% block main %}
-					<div class="side-app">
-						<div class="page-header">
-							<div>
-								<h1 class="page-title">Transaksi</h1>
-								<ol class="breadcrumb">
-									<li class="breadcrumb-item"><a href="#">Transaksi</a></li>
-									<li class="breadcrumb-item active" aria-current="page">Riwayat Transaksi</li>
-								</ol>
-							</div>
-                        </div>
+{% extends "base/base.html" %}
+{% load static %}
+{% load humanize %}
 
-                        <div class="row row-sm">
-							<div class="col-lg-12">
-								<div class="card">
-									<div class="card-header">
-										<h3 class="card-title">Riwayat Transaksi</h3>
-										<div class="ms-auto pageheader-btn">
-											<a href="#" data-bs-target="#modaldemo1" data-bs-toggle="modal" class="btn btn-success">Tambah data</a>
-										  </div>
-									</div>
-									<div class="card-body">
-										<div class="table-responsive">
-											<table class="table table-bordered text-nowrap border-bottom w-100" id="responsive-datatable">
-												<thead>
-													<tr>
-                            <th class="border-bottom-0">No</th>
-														<th class="border-bottom-0">Tanggal</th>
-														<th class="border-bottom-0">Jenis</th>
-														<th class="border-bottom-0">Tujuan</th>
-														<th class="border-bottom-0">Saldo</th>
-														<th class="border-bottom-0">Action</th>
-													</tr>
-												</thead>
-												<tbody>
-													{% for dt_trans in transaksi %}
-                          <tr>
-                          <td>{{ forloop.counter }}</td>
-                          <td>{{dt_trans.created_at|date:"d/m/Y" }}</td>
-                          <td>{{dt_trans.get_jenis_display }}</td>
-                          <td>{{dt_trans.tujuan }}</td>
-                          {% if dt_trans.jenis == "transfer" or dt_trans.jenis == "tarik_tunai" or dt_trans.jenis == "tiket_ferizy" %}
-                              <td> <i class="fa fa-minus-square" aria-hidden="true"></i> Rp.{{ dt_trans.saldo_keluar|intcomma }}</td>
-                          {% else %}
-                            <td> <i class="fa fa-plus-square" aria-hidden="true"></i> Rp.{{ dt_trans.saldo_masuk|intcomma }}</td>
-                          {% endif %}
-                          <td class="">
-                            <a class="btn btn-primary btn-sm rounded-11 me-2" data-bs-target="#detailModal{{ dt_trans.trans_id }}" data-bs-toggle="modal" data-bs-original-title="Detail"><i class="bi bi-info-circle" style="font-size: 20px; padding: 3px;"></i></a>
-															<a class="btn btn-danger btn-sm rounded-11" href="#" data-url="{% url 'app:hapus_transaksi' id_trans=dt_trans.trans_id %}" onclick="confirmDelete(this)" data-bs-toggle="tooltip" data-bs-original-title="Batalkan"><i><svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16">  <path d="M0 0h24v24H0V0z" fill="none"/>  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg></i></a>
-														</td>
-													</tr>
-                          <!-- Modal Detail Transaksi -->
-<div class="modal fade" id="detailModal{{ dt_trans.trans_id }}" tabindex="-1" aria-labelledby="detailModalLabel{{ dt_trans.trans_id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-      <div class="modal-content rounded-3 shadow-lg">
-          <div class="modal-header border-bottom-0">
-              <h5 class="modal-title" id="detailModalLabel{{ dt_trans.trans_id }}">
-                  <i class="bi bi-info-circle" style="font-size: 25px;"></i> Detail Transaksi
-              </h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <ul class="list-group list-group-flush">
-                  <li class="list-group-item"><strong>ID Transaksi:</strong> {{ dt_trans.trans_id }}</li>
-                  <li class="list-group-item"><strong>Jenis:</strong> {{ dt_trans.get_jenis_display }}</li>
-                  <li class="list-group-item"><strong>Tujuan:</strong> {{ dt_trans.tujuan }}</li>
-                  <li class="list-group-item"><strong>Saldo Masuk:</strong> {{ dt_trans.saldo_masuk|intcomma }}</li>
-                  <li class="list-group-item"><strong>Saldo Keluar:</strong> {{ dt_trans.saldo_keluar|intcomma }}</li>
-                  <li class="list-group-item"><strong>Tanggal:</strong> {{ dt_trans.created_at|date:"d/m/Y" }}</li>
-              </ul>
-          </div>
-          <div class="modal-footer border-top-0">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-          </div>
+{% block title %} Transaksi {% endblock %}
+
+{% block main %}
+<div class="side-app">
+	<div class="page-header">
+		<div>
+			<h1 class="page-title">Daftar Transaksi</h1>
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="#">Transaksi</a></li>
+				<li class="breadcrumb-item active" aria-current="page">Daftar Transaksi</li>
+			</ol>
+		</div>
+	</div>
+
+	<div class="row row-sm">
+		<div class="col-lg-12">
+			<div class="card">
+				<div class="card-header">
+					<h3 class="card-title">Daftar Transaksi</h3>
+					<div class="ms-auto pageheader-btn">
+						<a href="#" data-bs-target="#modalTambahTransaksi" data-bs-toggle="modal" class="btn btn-success">Tambah Transaksi</a>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table table-bordered text-nowrap border-bottom w-100" id="responsive-datatable">
+							<thead>
+								<tr>
+									<th class="border-bottom-0">No</th>
+									<th class="border-bottom-0">Jenis</th>
+									<th class="border-bottom-0">Rekening Sumber</th>
+									<th class="border-bottom-0">Rekening Tujuan</th>
+									<th class="border-bottom-0">Barang</th>
+									<th class="border-bottom-0">Qty</th>
+									<th class="border-bottom-0">Jumlah</th>
+									<th class="border-bottom-0">Keterangan</th>
+									<th class="border-bottom-0">Tanggal</th>
+									<th class="border-bottom-0">Dibuat Oleh</th>
+									<th class="border-bottom-0">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for trx in transaksi %}
+								<tr>
+									<td>{{ forloop.counter }}</td>
+									<td>{{ trx.get_jenis_display }}</td>
+									<td>{{ trx.rekening_sumber.nama_rek|default:"-" }}</td>
+									<td>{{ trx.rekening_tujuan.nama_rek }}</td>
+									<td>{{ trx.barang.nama|default:"-" }}</td>
+									<td>{{ trx.qty }}</td>
+									<td>{{ trx.jumlah|intcomma }}</td>
+									<td>{{ trx.keterangan }}</td>
+									<td>{{ trx.created_at|date:"d M Y H:i" }}</td>
+									<td>{{ trx.dibuat_oleh.full_name }}</td>
+									<td>
+										<a class="btn btn-primary btn-sm rounded-11 me-2"
+											data-bs-target="#modalEditTransaksi{{ trx.transaksi_id }}"
+											data-bs-toggle="modal" title="Edit">
+											<i class="fa fa-edit"></i>
+										</a>
+										<a class="btn btn-danger btn-sm rounded-11"
+											href="{% url 'app:hapus_transaksi' id_transaksi=trx.transaksi_id %}"
+											data-bs-toggle="tooltip" title="Delete"
+											data-message="Apakah Anda yakin ingin menghapus transaksi ini?">
+											<i class="fa fa-trash"></i>
+										</a>
+									</td>
+								</tr>
+								{% empty %}
+								<tr>
+									<td colspan="11" class="text-center">Belum ada transaksi</td>
+								</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modalTambahTransaksi" tabindex="-1" aria-labelledby="modalTambahTransaksiLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTambahTransaksiLabel">Tambah Transaksi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body">
+        <form action="{% url 'app:tambah_transaksi' %}" method="post">
+          {% csrf_token %}
+
+          <!-- Jenis Transaksi -->
+          <div class="mb-3">
+            <label for="jenis" class="form-label">Jenis Transaksi</label>
+            <select name="jenis" id="jenis" class="form-control" required onchange="toggleJenis()">
+              <option value="" disabled selected>-- Pilih Jenis --</option>
+              <option value="bank">Bank</option>
+              <option value="barang">Transaksi Barang</option>
+            </select>
+          </div>
+
+          <!-- Rekening Sumber (hanya untuk bank) -->
+          <div class="mb-3" id="field_rek_sumber" style="display:none;">
+            <label for="rekening_sumber" class="form-label">Rekening Sumber</label>
+            <select name="rekening_sumber" id="rekening_sumber" class="form-control">
+              <option value="" disabled selected>-- Pilih Rekening --</option>
+              {% for rek in rekening %}
+              <option value="{{ rek.rek_id }}">{{ rek.nama_rek }} (Saldo: {{ rek.saldo|intcomma }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Rekening Tujuan -->
+          <div class="mb-3">
+            <label for="rekening_tujuan" class="form-label">Rekening Tujuan</label>
+            <select name="rekening_tujuan" id="rekening_tujuan" class="form-control" required>
+              <option value="" disabled selected>-- Pilih Rekening --</option>
+              {% for rek in rekening %}
+              <option value="{{ rek.rek_id }}">{{ rek.nama_rek }} (Saldo: {{ rek.saldo|intcomma }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Jumlah (hanya untuk bank) -->
+          <div class="mb-3" id="field_jumlah" style="display:none;">
+            <label for="jumlah" class="form-label">Jumlah</label>
+            <input type="number" step="0.01" min="0" name="jumlah" id="jumlah" class="form-control" placeholder="Masukkan jumlah transfer">
+          </div>
+
+          <!-- Barang & Qty (hanya untuk barang) -->
+          <div class="mb-3" id="field_barang" style="display:none;">
+            <label for="barang" class="form-label">Barang</label>
+            <select name="barang" id="barang" class="form-control">
+              <option value="" disabled selected>-- Pilih Barang --</option>
+              {% for b in barang %}
+              <option value="{{ b.barang_id }}">{{ b.nama }} (Stok: {{ b.stok }}, Harga: {{ b.harga|intcomma }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3" id="field_qty" style="display:none;">
+            <label for="qty" class="form-label">Jumlah Barang</label>
+            <input type="number" name="qty" id="qty" class="form-control" min="1" placeholder="Masukkan jumlah barang">
+          </div>
+
+          <!-- Keterangan -->
+          <div class="mb-3">
+            <label for="keterangan" class="form-label">Keterangan</label>
+            <textarea name="keterangan" id="keterangan" class="form-control" rows="3" placeholder="Opsional"></textarea>
+          </div>
+
+          <input type="hidden" name="dibuat_oleh" value="{{ request.user.user_id }}">
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
-                          {% endfor %}
-												</tbody>
-											</table>
-										</div>
-                  </div>
-								</div>
-							</div>
-						</div>
-          </div>
-					<div class="modal fade" id="modaldemo1" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
-						<div class="modal-dialog" role="document">
-						  <div class="modal-content">
-							<div class="modal-header">
-							  <h5 class="modal-title" id="modaldemo1Label">Tambah Transaksi</h5>
-							  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-							<div class="modal-body">
-							  <form action="{% url 'app:tambah_transaksi' %}" id="form-transaksi" method="post">
-  {% csrf_token %}
-  
-  <!-- Jenis Transaksi -->
-  <div class="form-group mb-3">
-    <label for="jenis_transaksi" class="form-label">Jenis Transaksi</label>
-    <select id="jenis_transaksi" name="jenis_transaksi" class="form-control" onchange="handleJenisTransaksi()">
-      <option value="">-- Pilih Jenis Transaksi --</option>
-      <option value="isi_saldo">Isi Saldo</option>
-      <option value="transfer">Transfer</option>
-      <option value="tarik_tunai">Tarik Tunai</option>
-      <option value="tiket_ferizy">Tiket Ferizy</option>
-    </select>
-  </div>
 
-  <!-- Saldo Masuk -->
-  <div id="saldo-masuk-container" class="form-group mb-3" style="display:none;">
-    <label for="saldo_masuk" class="form-label">Jumlah Saldo Masuk</label>
-    <input type="number" id="saldo_masuk" name="saldo_masuk" class="form-control" placeholder="Masukkan jumlah saldo masuk">
-  </div>
-
-  <!-- Tujuan -->
-  <div id="tujuan-container" class="form-group mb-3" style="display:none;">
-    <label for="tujuan_transaksi" class="form-label">Tujuan</label>
-    <select id="tujuan_transaksi" name="tujuan_transaksi" class="form-control" onchange="handleTujuan()">
-      <option value="">-- Pilih Tujuan --</option>
-    </select>
-  </div>
-
-  <!-- Bank Tujuan -->
-  <div id="bank-select" class="form-group mb-3" style="display:none;">
-    <label for="bank_tujuan" class="form-label">Bank Tujuan</label>
-    <select id="bank_tujuan" name="bank_tujuan" class="form-control">
-      <option value="">-- Pilih Bank --</option>
-      <option value="bca">BCA</option>
-      <option value="bni">BNI</option>
-      <option value="bri">BRI</option>
-      <option value="mandiri">Mandiri</option>
-    </select>
-  </div>
-
-  <!-- E-Wallet Tujuan -->
-  <div id="ewallet-select" class="form-group mb-3" style="display:none;">
-    <label for="ewallet_tujuan" class="form-label">E-Wallet Tujuan</label>
-    <select id="ewallet_tujuan" name="ewallet_tujuan" class="form-control">
-      <option value="">-- Pilih E-Wallet --</option>
-      <option value="ovo">OVO</option>
-      <option value="gopay">GoPay</option>
-      <option value="dana">DANA</option>
-      <option value="shopeepay">ShopeePay</option>
-    </select>
-  </div>
-
-  <!-- Golongan Kendaraan -->
-  <div id="golongan-select" class="form-group mb-3" style="display:none;">
-    <label for="golongan" class="form-label">Golongan Kendaraan</label>
-    <select id="golongan" name="golongan" class="form-control" onchange="handleGolongan()">
-      <option value="">-- Pilih Golongan --</option>
-      <option value="2">Golongan 2</option>
-      <option value="3">Golongan 3</option>
-      <option value="4">Golongan 4</option>
-      <option value="5">Golongan 5</option>
-      <option value="6">Golongan 6</option>
-      <option value="7">Golongan 7</option>
-    </select>
-  </div>
-
-  <!-- Jumlah Saldo Keluar -->
-  <div id="saldo-keluar-container" class="form-group mb-3" style="display:none;">
-    <label for="saldo_keluar" class="form-label">Jumlah Saldo Keluar</label>
-    <input type="number" id="saldo_keluar" name="saldo_keluar" class="form-control" placeholder="Masukkan jumlah saldo keluar">
-  </div>
-
-  <!-- Modal Footer -->
-  <div class="modal-footer">
-    <button type="submit" class="btn btn-primary">Save changes</button>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-  </div>
-
-</form>
-							</div>
-						  </div>
-						</div>
-					  </div>
-
-            
-
-                     <!-- Script Handling -->
 <script>
-  function fadeIn(element) {
-    element.style.opacity = 0;
-    element.style.display = "block";
-    let opacity = 0;
-    const timer = setInterval(() => {
-      if (opacity >= 1) {
-        clearInterval(timer);
-      }
-      element.style.opacity = opacity;
-      opacity += 0.1;
-    }, 20);
-  }
-  
-  function fadeOut(element) {
-    element.style.opacity = 1;
-    const timer = setInterval(() => {
-      if (element.style.opacity <= 0) {
-        clearInterval(timer);
-        element.style.display = "none";
-      } else {
-        element.style.opacity -= 0.1;
-      }
-    }, 20);
-  }
-  
-  function setTujuanOptions(options) {
-    const tujuanSelect = document.getElementById("tujuan_transaksi");
-    tujuanSelect.innerHTML = `<option value="">-- Pilih Tujuan --</option>`;
-    options.forEach(option => {
-      let label = option.charAt(0).toUpperCase() + option.slice(1).replace("_", " ");
-      tujuanSelect.innerHTML += `<option value="${option}">${label}</option>`;
-    });
-  }
-  
-  function handleJenisTransaksi() {
-    const jenis = document.getElementById("jenis_transaksi").value;
-    const saldoMasukContainer = document.getElementById("saldo-masuk-container");
-    const saldoKeluarContainer = document.getElementById("saldo-keluar-container");
-    const tujuanContainer = document.getElementById("tujuan-container");
-    const bankSelect = document.getElementById("bank-select");
-    const ewalletSelect = document.getElementById("ewallet-select");
-    const golonganSelect = document.getElementById("golongan-select");
-  
-    saldoMasukContainer.style.display = "none";
-    saldoKeluarContainer.style.display = "none";
-    bankSelect.style.display = "none";
-    ewalletSelect.style.display = "none";
-    golonganSelect.style.display = "none";
-    tujuanContainer.style.display = "none";
-  
-    if (jenis === "isi_saldo") {
-      fadeIn(saldoMasukContainer);
-    } else if (jenis === "transfer" || jenis === "tarik_tunai") {
-      setTujuanOptions(["bank", "ewallet"]);
-      fadeIn(tujuanContainer);
-    } else if (jenis === "tiket_ferizy") {
-      setTujuanOptions(["perorangan", "kendaraan"]);
-      fadeIn(tujuanContainer);
-    }
-  }
-  
-  function handleTujuan() {
-    const tujuan = document.getElementById("tujuan_transaksi").value;
-    const bankSelect = document.getElementById("bank-select");
-    const ewalletSelect = document.getElementById("ewallet-select");
-    const saldoKeluarContainer = document.getElementById("saldo-keluar-container");
-    const golonganSelect = document.getElementById("golongan-select");
-  
-    bankSelect.style.display = "none";
-    ewalletSelect.style.display = "none";
-    saldoKeluarContainer.style.display = "none";
-    golonganSelect.style.display = "none";
-  
-    if (tujuan === "bank") {
-      fadeIn(bankSelect);
-      fadeIn(saldoKeluarContainer);
-    } else if (tujuan === "ewallet") {
-      fadeIn(ewalletSelect);
-      fadeIn(saldoKeluarContainer);
-    } else if (tujuan === "kendaraan") {
-      fadeIn(golonganSelect);
-    } else if (tujuan === "perorangan") {
-      fadeIn(saldoKeluarContainer);
-    }
-  }
-  
-  function handleGolongan() {
-    const golongan = document.getElementById("golongan").value;
-    const saldoKeluarContainer = document.getElementById("saldo-keluar-container");
-  
-    if (golongan !== "") {
-      fadeIn(saldoKeluarContainer);
-    }
-  }
-  </script>
+function toggleJenis() {
+  const jenis = document.getElementById("jenis").value;
+  document.getElementById("field_rek_sumber").style.display = (jenis === "bank") ? "block" : "none";
+  document.getElementById("field_jumlah").style.display = (jenis === "bank") ? "block" : "none";
+  document.getElementById("field_barang").style.display = (jenis === "barang") ? "block" : "none";
+  document.getElementById("field_qty").style.display = (jenis === "barang") ? "block" : "none";
+}
+</script>
 
-  <script>
-    function validateForm() {
-        const jenis = document.getElementById('jenis_transaksi').value;
-        const saldoMasuk = document.getElementById('saldo_masuk').value;
-        const tujuan = document.getElementById('tujuan_transaksi').value;
-        const bank = document.getElementById('bank_tujuan').value;
-        const ewallet = document.getElementById('ewallet_tujuan').value;
-        const golongan = document.getElementById('golongan').value;
-        const saldoKeluar = document.getElementById('saldo_keluar').value;
-    
-        if (!jenis) {
-            Swal.fire('Peringatan', 'Jenis transaksi harus dipilih.', 'warning');
-            return false;
-        }
-    
-        if (jenis === 'isi_saldo') {
-            if (!saldoMasuk) {
-                Swal.fire('Peringatan', 'Jumlah saldo masuk harus diisi.', 'warning');
-                return false;
-            }
-        }
-    
-        if (jenis === 'transfer') {
-            if (!tujuan) {
-                Swal.fire('Peringatan', 'Tujuan harus dipilih.', 'warning');
-                return false;
-            }
-            if (tujuan === 'bank' && !bank) {
-                Swal.fire('Peringatan', 'Bank tujuan harus dipilih.', 'warning');
-                return false;
-            }
-            if (tujuan === 'ewallet' && !ewallet) {
-                Swal.fire('Peringatan', 'E-wallet tujuan harus dipilih.', 'warning');
-                return false;
-            }
-            if (!saldoKeluar) {
-                Swal.fire('Peringatan', 'Jumlah saldo keluar harus diisi.', 'warning');
-                return false;
-            }
-        }
-    
-        if (jenis === 'tarik_tunai') {
-            if (!tujuan) {
-              Swal.fire('Peringatan', 'Tujuan harus dipilih.', 'warning');
-              return false;
-            }
-            if (tujuan === 'bank' && !bank) {
-            Swal.fire('Peringatan', 'Bank tujuan harus dipilih.', 'warning');
-            return false;
-            }
-            if (tujuan === 'ewallet' && !ewallet) {
-            Swal.fire('Peringatan', 'E-wallet tujuan harus dipilih.', 'warning');
-            return false;
-            }
-            if (!saldoKeluar) {
-                Swal.fire('Peringatan', 'Jumlah saldo keluar harus diisi.', 'warning');
-                return false;
-            }
-        }
-    
-        if (jenis === 'tiket_ferizy') {
-            if (!tujuan) {
-              Swal.fire('Peringatan', 'Tujuan harus dipilih.', 'warning');
-              return false;
-            }
-            if (tujuan === 'kendaraan' && !golongan) {
-                Swal.fire('Peringatan', 'Golongan kendaraan harus dipilih.', 'warning');
-                return false;
-            }
-            if (!saldoKeluar) {
-                Swal.fire('Peringatan', 'Jumlah saldo keluar harus diisi.', 'warning');
-                return false;
-            }
-        }
-    
-        return true; // semua valid
-    }
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('form-transaksi'); // ganti sesuai ID form kamu
-        if (form) {
-            form.addEventListener('submit', function(event) {
-                if (!validateForm()) {
-                    event.preventDefault(); // blokir submit kalau gak valid
-                }
-            });
-        }
-    });
-    </script>
-    
-    
-  
-  <!-- Style -->
-  <style>
-  #saldo-masuk-container,
-  #tujuan-container,
-  #bank-select,
-  #ewallet-select,
-  #golongan-select,
-  #saldo-keluar-container {
-    transition: opacity 0.3s ease;
-  }
-  </style>
-		
-
-
-
-
-                
-                    
 {% endblock %}

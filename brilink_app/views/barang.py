@@ -10,7 +10,13 @@ from django.utils.decorators import method_decorator
 @method_decorator(login_required(), name='dispatch')
 class BarangViews(View):
     def get(self, request):
-        barang = Barang.objects.all()
+        if hasattr(request.user, "role") and request.user.role == "developer":
+            barang = Barang.objects.all()
+        elif request.user.role == "admin":
+            barang = Barang.objects.filter(pemilik=request.user.user_id)
+        else:
+            barang = Barang.objects.none()
+        
         data ={
             'barang' : barang,
             }

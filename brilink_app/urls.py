@@ -22,6 +22,8 @@ urlpatterns = [
     path('rekening/',include([
         path('', rekening.RekViews.as_view(), name='index_rekening'),
         path('tambah/', rekening.RekCreateViews.as_view(), name='tambah_rekening'),
+        path('edit/<str:id_rek>/', rekening.RekEditViews.as_view(), name='edit_rekening'),
+        path('saldo/<str:id_rek>/', rekening.TambahSaldoViews.as_view(), name='tambah_saldo'),
         path('hapus/<str:id_rek>/', rekening.RekHapusViews.as_view(), name='hapus_rekening'),
     ]) ),
 
@@ -32,10 +34,11 @@ urlpatterns = [
         path('hapus/<str:id_brg>/', barang.BarangHapusViews.as_view(), name='hapus_barang'),
         path('restok/<str:id_barang>/', barang.TambahStokViews.as_view(), name='restok'),
     ]) ),
-    # path('transaksi/', include([
-    #     path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
-    #     path('tambah/',transaksi.TransCreateViews.as_view(), name='tambah_transaksi'),
-    #     path('hapus/<str:id_trans>/',transaksi.TransHapusViews.as_view(), name='hapus_transaksi'),
-    # ]))
+
+    path('transaksi/', include([
+        path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
+        path('tambah/',transaksi.TransaksiCreateViews.as_view(), name='tambah_transaksi'),
+        path('hapus/<str:id_transaksi>/',transaksi.TransaksiHapusViews.as_view(), name='hapus_transaksi'),
+    ])),
     
 ]

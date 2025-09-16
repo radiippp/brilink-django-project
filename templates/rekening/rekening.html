@@ -40,28 +40,40 @@
                                                         <td>{{dt_rek.saldo|intcomma }}</td>
                                                         <td class="">
 															<a class="btn btn-primary btn-sm rounded-11 me-2" data-bs-target="#modaldemo2{{ dt_rek.rek_id }}" data-bs-toggle="modal" data-bs-original-title="Edit"><i><svg class="table-edit" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM5.92 19H5v-.92l9.06-9.06.92.92L5.92 19zM20.71 5.63l-2.34-2.34c-.2-.2-.45-.29-.71-.29s-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41z"/></svg></i></a>
+															<a class="btn btn-success btn-sm rounded-11 me-2"
+																data-bs-toggle="modal"
+																data-bs-target="#modalTambahSaldo{{ dt_rek.rek_id }}"
+																data-bs-placement="top"
+																title="Tambah Saldo">
+																	<i>
+																		<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16">
+																			<path d="M0 0h24v24H0V0z" fill="none"/>
+																			<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+																		</svg>
+																	</i>
+																</a>
 															<a class="btn btn-danger btn-sm rounded-11" data-bs-toggle="tooltip" data-bs-original-title="Delete" href="{% url 'app:hapus_rekening' id_rek=dt_rek.rek_id %}" data-message="Apakah Anda yakin ingin menghapus Akun ini?"><i><svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg></i></a>
 														</td>
 													</tr>
-                                                    <div class="modal fade" id="modaldemo2{{ dt_rek.rek_id }}" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
+													<div class="modal fade" id="modaldemo2{{ dt_rek.rek_id }}" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
                                                         <div class="modal-dialog" role="document">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
-                                                                <h5 class="modal-title" id="modaldemo1Label">Tambah Saldo Rekening</h5>
+                                                                <h5 class="modal-title" id="modaldemo1Label">Edit Data Barang</h5>
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                 </div>
                                                                 <div class="modal-body">
-                                                                    <form action="#" method="post" onsubmit="return validateSaldo()">
-                                                                        {% csrf_token %}
-                                                                        
+                                                                    <form action="{% url 'app:edit_rekening' id_rek=dt_rek.rek_id %}" method="post" onsubmit="return validateSaldo()">
+                                                                        {% csrf_token %}    
                                                                         <div class="mb-3">
-                                                                            <label for="saldo_awal" class="form-label">Masukkan Saldo</label>
-                                                                            <input type="number" name="saldo_masuk" class="form-control" id="saldo_awal" min="0" required />
-                                                                            <small>Pastikan Input Dengan Angka</small>
-                                                                        </div>
-
-                                                                        <input type="hidden" name="tujuan" class="form-control"  value="Rekening" required />
-                                                                        <input type="hidden" name="jenis" class="form-control"  value="isi_saldo" required />
+																			<label for="nama_rek" class="form-label">Nama Rekening</label>
+																			<input type="text" value="{{ dt_rek.nama_rek }}" name="nama_rek" class="form-control" id="nama_barang" required />
+																		</div>
+																		<div class="mb-3">
+																			<label for="saldo_awal" class="form-label">Masukkan Saldo Awal</label>
+																			<input type="number" value="{{ dt_rek.saldo }}" name="saldo_awal" class="form-control" id="saldo_awal" min="0" required />
+																			<small>Pastikan Input Dengan Angka</small>
+																		</div>
                                                                         <div class="modal-footer">
                                                                             <button type="submit" class="btn btn-primary">Save changes</button>
                                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -71,6 +83,35 @@
                                                             </div>
                                                         </div>
                                                     </div>
+													<div class="modal fade" id="modalTambahSaldo{{ dt_rek.rek_id }}" tabindex="-1" aria-labelledby="modalTambahSaldoLabel{{ dt_rek.rek_id }}" aria-hidden="true">
+														<div class="modal-dialog" role="document">
+															<div class="modal-content">
+
+																<div class="modal-header">
+																	<h5 class="modal-title" id="modalTambahSaldoLabel{{ dt_rek.rek_id }}">
+																		Tambah Saldo untuk {{ dt_rek.nama_rek }}
+																	</h5>
+																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+																</div>
+
+																<form action="{% url 'app:tambah_saldo' id_rek=dt_rek.rek_id %}" method="post">
+																	{% csrf_token %}
+																	<div class="modal-body">
+																		<div class="mb-3">
+																			<label for="saldo_baru{{ dt_rek.rek_id }}" class="form-label">Jumlah saldo Tambahan</label>
+																			<input type="number" class="form-control" id="saldo_baru{{ dt_rek.rek_id }}" name="saldo_baru" placeholder="Masukkan jumlah saldo" min="1" required>
+																			<small>Masukkan angka saldo yang ingin ditambahkan</small>
+																		</div>
+																	</div>
+																	<div class="modal-footer">
+																		<button type="submit" class="btn btn-success">Tambah</button>
+																		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+																	</div>
+																</form>
+
+															</div>
+														</div>
+													</div>
                                                     {% endfor %}
 												</tbody>
 											</table>

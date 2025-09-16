@@ -38,7 +38,7 @@ class CreateViews(View):
         frm_email = request.POST.get('email')
         frm_phone = request.POST.get('phone')
         frm_password = request.POST.get('password')
-        frm_created_by = request.POST.get('created_by')
+        # frm_created_by = request.POST.get('created_by')
         frm_role = request.POST.get('role')
 
         try:
@@ -51,7 +51,7 @@ class CreateViews(View):
                     password=frm_password,
                     full_name=frm_nama_lengkap,
                     role=frm_role,
-                    created_by = frm_created_by
+                    created_by = request.user
                 )
                 messages.success(request, f"Akun berhasil ditambahkan")
                 return redirect('app:index_user')

@@ -114,6 +114,18 @@
 	  });
 	  
     </script>
+	<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("a[data-message]").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+            var pesan = el.getAttribute("data-message");
+            if (!confirm(pesan)) {
+                e.preventDefault(); // batalkan redirect kalau user pilih "Cancel"
+            }
+        });
+    });
+});
+</script>
 
     <!-- base.html -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

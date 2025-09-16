@@ -88,7 +88,9 @@ class Master_User(AbstractBaseUser, CreateUpdateTime):
     date_of_birth = models.DateField(blank=True, null=True)
     # avatar = models.ImageField(blank=True, null=True, upload_to='images/avatar/', default='images/avatar/default_avatar.png')
     role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='admin')
-    created_by = models.CharField(max_length=255, blank=True, null=True)
+    created_by = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="staffs"
+    )
     
     objects = Master_UserManager()
 
@@ -122,58 +124,66 @@ class Barang(CreateUpdateTime):
     def __str__(self):
         return f"{self.nama} (stok: {self.stok})"
     
+class JenisTransaksi(CreateUpdateTime):
+    KATEGORI_CHOICES = [
+        ("KEUANGAN", "Keuangan"),
+        ("BARANG", "Barang"),      
+    ]
+    nama = models.CharField(max_length=50)  
+    kategori = models.CharField(max_length=20, choices=KATEGORI_CHOICES)
+    created_by = models.ForeignKey("Master_User", on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.nama} ({self.kategori})"
+
+    
 class Transaksi(CreateUpdateTime):
-    TRANSAKSI_CHOICES = (
-        ("transfer", "Transfer"),
-        ("barang", "Transaksi Barang"),
-    )
-
     transaksi_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    jenis = models.CharField(max_length=10, choices=TRANSAKSI_CHOICES)
-
     rekening_sumber = models.ForeignKey(
-        Rekening, on_delete=models.SET_NULL, null=True, blank=True, related_name="transaksi_keluar"
+        "Rekening", related_name="transaksi_sumber",
+        on_delete=models.CASCADE, null=True, blank=True
     )
     rekening_tujuan = models.ForeignKey(
-        Rekening, on_delete=models.CASCADE, related_name="transaksi_masuk"
+        "Rekening", related_name="transaksi_tujuan",
+        on_delete=models.CASCADE, null=True, blank=True
     )
-
+    barang = models.ForeignKey(
+        "Barang", on_delete=models.CASCADE, null=True, blank=True
+    )
+    qty = models.PositiveIntegerField(default=0)
     jumlah = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    keterangan = models.TextField(blank=True, null=True)
-
-    # khusus untuk transaksi barang
-    barang = models.ForeignKey(Barang, on_delete=models.SET_NULL, null=True, blank=True)
-    qty = models.IntegerField(default=0)
+    tax = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    dibuat_oleh = models.ForeignKey(Master_User, on_delete=models.CASCADE)
 
     def proses(self):
         """Update saldo rekening & stok barang"""
-        if self.jenis == "transfer":
+        if self.jenis.kategori == "KEUANGAN":
             if not self.rekening_sumber:
-                raise ValueError("Transfer wajib punya rekening sumber")
+                raise ValueError("Transaksi keuangan wajib punya rekening sumber")
 
-            # update saldo rekening
+            # saldo sumber berkurang
             self.rekening_sumber.saldo -= self.jumlah
             self.rekening_sumber.save()
-            self.rekening_tujuan.saldo += self.jumlah
+
+            # saldo tujuan bertambah (termasuk tax kalau ada)
+            self.rekening_tujuan.saldo += self.jumlah + self.tax
             self.rekening_tujuan.save()
 
-        elif self.jenis == "barang":
+        elif self.jenis.kategori == "BARANG":
             if not self.barang:
                 raise ValueError("Transaksi barang wajib punya barang")
 
             total = self.barang.harga * self.qty
-            self.jumlah = total  # simpan total ke field jumlah
+            self.jumlah = total
 
-            # update stok barang
             if self.barang.stok < self.qty:
                 raise ValueError("Stok barang tidak mencukupi")
+
+            # update stok barang
             self.barang.stok -= self.qty
             self.barang.save()
 
-            # update saldo rekening tujuan
+            # rekening tujuan bertambah
             self.rekening_tujuan.saldo += total
             self.rekening_tujuan.save()
 
         self.save()
-
-
