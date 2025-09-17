@@ -55,8 +55,18 @@
 																		</svg>
 																	</i>
 																</a>
-															<a class="btn btn-danger btn-sm rounded-11" data-bs-toggle="tooltip" data-bs-original-title="Delete" href="{% url 'app:hapus_barang' id_brg=dt_brg.barang_id %}" data-message="Apakah Anda yakin ingin menghapus Barang ini?"><i><svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/></svg></i></a>
-
+															<a class="btn btn-danger btn-sm rounded-11 delete-link"
+																href="#"
+																data-url="{% url 'app:hapus_barang' id_barang=dt_brg.barang_id %}"
+																data-bs-toggle="tooltip"
+																data-bs-original-title="Delete">
+																<i>
+																	<svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16">
+																		<path d="M0 0h24v24H0V0z" fill="none"/>
+																		<path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/>
+																	</svg>
+																</i>
+																</a>
 														</td>
 													</tr>
                                                     <div class="modal fade" id="modaldemo2{{ dt_brg.barang_id }}" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">

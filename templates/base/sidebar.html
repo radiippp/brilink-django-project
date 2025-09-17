@@ -14,6 +14,7 @@
 						<li class="slide ">
 							<a class="side-menu__item"  data-bs-toggle="slide" href="{% url "app:index_home" %}"><i class="side-menu__icon fe fe-home"></i><span class="side-menu__label">Dashboard</span></a>
 						</li>
+						{% if request.user.role == 'admin' or request.user.role == 'developer' %}
 						<li class="slide">
 							<a class="side-menu__item" data-bs-toggle="slide" href="{% url "app:index_user" %}"><i class="side-menu__icon fe fe-globe"></i><span class="side-menu__label">Master User</span></a>
 						</li>
@@ -24,18 +25,23 @@
 							<a class="side-menu__item" href="{% url "app:index_barang" %}"><i class="side-menu__icon fe fe-grid"></i><span class="side-menu__label">Barang</span></a>
 						</li>
 						<li>
+							<a class="side-menu__item" href="{% url "app:index_jenis" %}"><i class="side-menu__icon fe fe-grid"></i><span class="side-menu__label">Jenis Transaksi</span></a>
+						</li>
+						{% endif %}
+						<li>
 							<a class="side-menu__item" href="{% url "app:index_transaksi" %}"><i class="side-menu__icon fe fe-grid"></i><span class="side-menu__label">Transaksi</span></a>
 						</li>
 						<li><h3>settings</h3></li>
 						<li>
 							<a class="side-menu__item" href="{% url "app:profile_user" id_akun=request.user.user_id %}"><i class="side-menu__icon fe fe-grid"></i><span class="side-menu__label">Profile</span></a>
 						</li>
-							<a class="side-menu__item logout-link" 
-								href="{% url 'app:logout_page' %}" 
-								data-message="Apakah Anda yakin ingin Log Out?">
+							<a class="side-menu__item logout-link"
+								href="#"
+								data-url="{% url 'app:logout_page' %}">
 								<i class="side-menu__icon fe fe-globe"></i>
 								<span class="side-menu__label">Log out</span>
-							</a>
+								</a>
+
 					</ul>
 				</aside>
 

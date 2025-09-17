@@ -14,16 +14,41 @@
 				<li class="breadcrumb-item active" aria-current="page">Daftar Transaksi</li>
 			</ol>
 		</div>
+    <a href="#" data-bs-target="#modalTambahTransaksi" data-bs-toggle="modal" class="btn btn-success">Tambah Transaksi</a>
 	</div>
 
 	<div class="row row-sm">
 		<div class="col-lg-12">
 			<div class="card">
 				<div class="card-header">
-					<h3 class="card-title">Daftar Transaksi</h3>
-					<div class="ms-auto pageheader-btn">
-						<a href="#" data-bs-target="#modalTambahTransaksi" data-bs-toggle="modal" class="btn btn-success">Tambah Transaksi</a>
-					</div>
+            <form method="get" class="d-flex flex-wrap align-items-center gap-2">
+              <select name="filter_range" class="form-select form-select-">
+                  <option value="">-- Pilih Filter --</option>
+                  <option value="today" {% if request.GET.filter_range == "today" %}selected{% endif %}>Hari ini</option>
+                  <option value="7days" {% if request.GET.filter_range == "7days" %}selected{% endif %}>7 Hari Terakhir</option>
+                  <option value="1month" {% if request.GET.filter_range == "1month" %}selected{% endif %}>1 Bulan Terakhir</option>
+              </select>
+
+              <input type="date" name="start_date" class="form-control form-control"
+                    value="{{ request.GET.start_date }}">
+              <input type="date" name="end_date" class="form-control form-control"
+                    value="{{ request.GET.end_date }}">
+
+
+              <button type="submit" class="btn btn btn-primary">Filter</button>
+              {% if filtered %}
+                <a href="{% url 'app:export_transaksi' %}?filter_range={{ request.GET.filter_range }}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}"
+                  class="btn btn-success text-white">
+                  <i class="fa fa-file-excel-o me-1"></i> Export ke Excel
+                </a>
+              {% else %}
+                <a href="javascript:void(0);" 
+                  class="btn btn-success text-white" 
+                  onclick="showFilterAlert()">
+                  <i class="fa fa-file-excel-o me-1"></i> Export ke Excel
+                </a>
+              {% endif %}
+            </form>
 				</div>
 				<div class="card-body">
 					<div class="table-responsive">
@@ -40,42 +65,67 @@
 									<th class="border-bottom-0">Keterangan</th>
 									<th class="border-bottom-0">Tanggal</th>
 									<th class="border-bottom-0">Dibuat Oleh</th>
-									<th class="border-bottom-0">Action</th>
+                  {% if request.user.role == 'developer' %}
+									  <th class="border-bottom-0">Action</th>
+                  {% endif %}
 								</tr>
 							</thead>
 							<tbody>
-								{% for trx in transaksi %}
-								<tr>
-									<td>{{ forloop.counter }}</td>
-									<td>{{ trx.get_jenis_display }}</td>
-									<td>{{ trx.rekening_sumber.nama_rek|default:"-" }}</td>
-									<td>{{ trx.rekening_tujuan.nama_rek }}</td>
-									<td>{{ trx.barang.nama|default:"-" }}</td>
-									<td>{{ trx.qty }}</td>
-									<td>{{ trx.jumlah|intcomma }}</td>
-									<td>{{ trx.keterangan }}</td>
-									<td>{{ trx.created_at|date:"d M Y H:i" }}</td>
-									<td>{{ trx.dibuat_oleh.full_name }}</td>
-									<td>
-										<a class="btn btn-primary btn-sm rounded-11 me-2"
-											data-bs-target="#modalEditTransaksi{{ trx.transaksi_id }}"
-											data-bs-toggle="modal" title="Edit">
-											<i class="fa fa-edit"></i>
-										</a>
-										<a class="btn btn-danger btn-sm rounded-11"
-											href="{% url 'app:hapus_transaksi' id_transaksi=trx.transaksi_id %}"
-											data-bs-toggle="tooltip" title="Delete"
-											data-message="Apakah Anda yakin ingin menghapus transaksi ini?">
-											<i class="fa fa-trash"></i>
-										</a>
-									</td>
-								</tr>
-								{% empty %}
-								<tr>
-									<td colspan="11" class="text-center">Belum ada transaksi</td>
-								</tr>
-								{% endfor %}
-							</tbody>
+              {% if filtered %}
+                  {% for trx in transaksi %}
+                  <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ trx.jenis.nama }}</td>
+                      <td>{{ trx.rekening_sumber.nama_rek|default:"-" }}</td>
+                      <td>{{ trx.rekening_tujuan.nama_rek }}</td>
+                      <td>{{ trx.barang.nama|default:"-" }}</td>
+                      <td>{{ trx.qty }}</td>
+                      <td>{{ trx.jumlah|intcomma }}</td>
+                      <td>{{ trx.keterangan }}</td>
+                      <td>{{ trx.created_at|date:"d M Y H:i" }}</td>
+                      <td>{{ trx.dibuat_oleh.full_name }}</td>
+                      {% if request.user.role == 'developer' %}
+                      <td>
+                          {% comment %} <a class="btn btn-primary btn-sm rounded-11 me-2"
+                            data-bs-target="#modalEditTransaksi{{ trx.transaksi_id }}"
+                            data-bs-toggle="modal" title="Edit">
+                            <i class="fa fa-edit"></i>
+                          </a> {% endcomment %}
+                          <a class="btn btn-danger btn-sm rounded-11"
+                            href=""
+                            data-bs-toggle="tooltip" title="Delete"
+                            data-message="Apakah Anda yakin ingin menghapus transaksi ini?">
+                            <i class="fa fa-trash"></i>
+                          </a>
+                          
+                            <a class="btn btn-danger btn-sm rounded-11 delete-link"
+                                  href="#"
+                                  data-url="{% url 'app:hapus_transaksi' id_transaksi=trx.transaksi_id %}"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-original-title="Delete">
+                                  <i>
+                                    <svg class="table-delete" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="16">
+                                      <path d="M0 0h24v24H0V0z" fill="none"/>
+                                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9zm7.5-5l-1-1h-5l-1 1H5v2h14V4h-3.5z"/>
+                                    </svg>
+                                  </i>
+                                  </a>
+                          
+                      </td>
+                      {% endif %}
+                  </tr>
+                  {% empty %}
+                  <tr>
+                      <td colspan="11" class="text-center">Tidak ada transaksi pada filter ini</td>
+                  </tr>
+                  {% endfor %}
+              {% else %}
+                  <tr>
+                      <td colspan="11" class="text-center text-muted">Silakan pilih filter untuk melihat transaksi</td>
+                  </tr>
+              {% endif %}
+          </tbody>
+
 						</table>
 					</div>
 				</div>
@@ -100,15 +150,16 @@
             <label for="jenis" class="form-label">Jenis Transaksi</label>
             <select name="jenis" id="jenis" class="form-control" required onchange="toggleJenis()">
               <option value="" disabled selected>-- Pilih Jenis --</option>
-              <option value="bank">Bank</option>
-              <option value="barang">Transaksi Barang</option>
+              {% for jns in jenis %}
+              <option value="{{ jns.jenis_id }}" data-kategori="{{ jns.kategori }}">{{ jns.nama }} </option>
+              {% endfor %}
             </select>
           </div>
 
           <!-- Rekening Sumber (hanya untuk bank) -->
           <div class="mb-3" id="field_rek_sumber" style="display:none;">
             <label for="rekening_sumber" class="form-label">Rekening Sumber</label>
-            <select name="rekening_sumber" id="rekening_sumber" class="form-control">
+            <select name="rekening_sumber" id="rekening_sumber" class="form-control"  onchange="filterRekeningTujuan()">
               <option value="" disabled selected>-- Pilih Rekening --</option>
               {% for rek in rekening %}
               <option value="{{ rek.rek_id }}">{{ rek.nama_rek }} (Saldo: {{ rek.saldo|intcomma }})</option>
@@ -128,10 +179,14 @@
           </div>
 
           <!-- Jumlah (hanya untuk bank) -->
-          <div class="mb-3" id="field_jumlah" style="display:none;">
-            <label for="jumlah" class="form-label">Jumlah</label>
-            <input type="number" step="0.01" min="0" name="jumlah" id="jumlah" class="form-control" placeholder="Masukkan jumlah transfer">
-          </div>
+         <div class="mb-3" id="field_jumlah" style="display:none;">
+          <label for="jumlah_display" class="form-label">Jumlah</label>
+          <!-- Input tampilan (user lihat ini) -->
+          <input type="text" id="jumlah_display" class="form-control" placeholder="Masukkan jumlah transfer" oninput="formatJumlah()">
+
+          <!-- Input asli (hidden, untuk dikirim ke server) -->
+          <input type="hidden" name="jumlah" id="jumlah">
+        </div>
 
           <!-- Barang & Qty (hanya untuk barang) -->
           <div class="mb-3" id="field_barang" style="display:none;">
@@ -169,11 +224,61 @@
 
 <script>
 function toggleJenis() {
-  const jenis = document.getElementById("jenis").value;
-  document.getElementById("field_rek_sumber").style.display = (jenis === "bank") ? "block" : "none";
-  document.getElementById("field_jumlah").style.display = (jenis === "bank") ? "block" : "none";
-  document.getElementById("field_barang").style.display = (jenis === "barang") ? "block" : "none";
-  document.getElementById("field_qty").style.display = (jenis === "barang") ? "block" : "none";
+  const select = document.getElementById("jenis");
+  const kategori = select.options[select.selectedIndex].getAttribute("data-kategori");
+
+  // reset semua dulu
+  document.getElementById("field_rek_sumber").style.display = "none";
+  document.getElementById("field_jumlah").style.display = "none";
+  document.getElementById("field_barang").style.display = "none";
+  document.getElementById("field_qty").style.display = "none";
+
+  // tampilkan sesuai kategori
+  if (kategori === "KEUANGAN") {
+    document.getElementById("field_rek_sumber").style.display = "block";
+    document.getElementById("field_jumlah").style.display = "block";
+  } else if (kategori === "BARANG") {
+    document.getElementById("field_barang").style.display = "block";
+    document.getElementById("field_qty").style.display = "block";
+  }
+}
+
+function filterRekeningTujuan() {
+  const sumber = document.getElementById("rekening_sumber").value;
+  const tujuan = document.getElementById("rekening_tujuan");
+
+  for (let option of tujuan.options) {
+    if (option.value === sumber && sumber !== "") {
+      option.style.display = "none"; // sembunyikan rekening yg dipilih
+    } else {
+      option.style.display = "block"; // tampilkan lainnya
+    }
+  }
+
+  // reset kalau tujuan = sumber
+  if (tujuan.value === sumber) {
+    tujuan.value = "";
+  }
+}
+
+function formatJumlah() {
+  let displayInput = document.getElementById("jumlah_display");
+  let hiddenInput = document.getElementById("jumlah");
+
+  // Hilangkan semua karakter non-angka
+  let value = displayInput.value.replace(/[^0-9]/g, "");
+
+  if (value === "") {
+    hiddenInput.value = "";
+    displayInput.value = "";
+    return;
+  }
+
+  // Simpan angka asli ke input hidden
+  hiddenInput.value = value;
+
+  // Format ribuan (pakai titik, contoh: 1000000 -> 1.000.000)
+  displayInput.value = new Intl.NumberFormat("id-ID").format(value);
 }
 </script>
 

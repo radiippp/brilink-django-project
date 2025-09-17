@@ -125,6 +125,7 @@ class Barang(CreateUpdateTime):
         return f"{self.nama} (stok: {self.stok})"
     
 class JenisTransaksi(CreateUpdateTime):
+    jenis_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     KATEGORI_CHOICES = [
         ("KEUANGAN", "Keuangan"),
         ("BARANG", "Barang"),      
@@ -138,6 +139,7 @@ class JenisTransaksi(CreateUpdateTime):
     
 class Transaksi(CreateUpdateTime):
     transaksi_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    jenis = models.ForeignKey(JenisTransaksi, on_delete=models.CASCADE,null=True, blank=True)
     rekening_sumber = models.ForeignKey(
         "Rekening", related_name="transaksi_sumber",
         on_delete=models.CASCADE, null=True, blank=True
@@ -153,6 +155,7 @@ class Transaksi(CreateUpdateTime):
     jumlah = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     tax = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     dibuat_oleh = models.ForeignKey(Master_User, on_delete=models.CASCADE)
+    keterangan = models.TextField(null=True, blank=True)
 
     def proses(self):
         """Update saldo rekening & stok barang"""
@@ -172,7 +175,7 @@ class Transaksi(CreateUpdateTime):
             if not self.barang:
                 raise ValueError("Transaksi barang wajib punya barang")
 
-            total = self.barang.harga * self.qty
+            total = self.barang.harga * Decimal(self.qty)
             self.jumlah = total
 
             if self.barang.stok < self.qty:

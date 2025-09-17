@@ -9,9 +9,12 @@ from django.contrib.auth import update_session_auth_hash
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from brilink_app.decorators import *
 
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class UserViews(View):
+    
     def get(self, request):
         if hasattr(request.user, "role") and request.user.role == "developer":
             user = Master_User.objects.all()
@@ -25,6 +28,7 @@ class UserViews(View):
         return render(request, 'user/userview.html',data)
 
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 #create user
 class CreateViews(View):
     def get(self, request):
@@ -62,6 +66,7 @@ class CreateViews(View):
             return redirect('app:index_user')
         
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
  #Edit Data       
 class EditViews(View):
     def get(self, request, id_akun):
@@ -110,7 +115,8 @@ class EditViews(View):
             messages.error(request, "Gagal mengubah akun")
             return redirect('app:index_user')
 
-@method_decorator(login_required(), name='dispatch')        
+@method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class HapusViews(View):
     def get(self, request, id_akun):
         try:
@@ -122,7 +128,9 @@ class HapusViews(View):
         except Master_User.DoesNotExist:
             messages.error(request, "Akun tidak ditemukan")
         return redirect('app:index_user')
-@method_decorator(login_required(), name='dispatch')        
+    
+@method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class PermanenHapusViews(View):
     def get(self, request, id_akun):
         try:

@@ -127,32 +127,70 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+
     <!-- base.html -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  function confirmDelete(element) {
-    const url = element.getAttribute('data-url');
+	<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		document.querySelectorAll(".delete-link").forEach(function(el) {
+			el.addEventListener("click", function(e) {
+				e.preventDefault();
+				let deleteUrl = el.getAttribute("data-url");
+				let message = el.getAttribute("data-message") || "Yakin ingin menghapus data ini?";
 
-    Swal.fire({
-      title: "Yakin ingin menghapus?",
-      text: "Data ini tidak dapat dikembalikan!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Ya, hapus!",
-      cancelButtonText: "Batal"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = url;
-      }
+				Swal.fire({
+					title: 'Konfirmasi Hapus',
+					text: message,
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#d33',
+					cancelButtonColor: '#3085d6',
+					confirmButtonText: 'Ya, Hapus',
+					cancelButtonText: 'Batal'
+				}).then((result) => {
+					if (result.isConfirmed) {
+						window.location.href = deleteUrl;
+					}
+				});
+			});
+		});
+	});
+	</script>
+
+<script>document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".logout-link").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+            e.preventDefault();
+            let logoutUrl = el.getAttribute("data-url");
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Anda akan keluar dari akun!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Log Out',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = logoutUrl;
+                }
+            });
+        });
     });
-
-    // Mencegah link langsung terbuka
-    return false;
+});</script>
+<script>
+  function showFilterAlert() {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Filter belum dipilih',
+      text: 'Silakan pilih filter terlebih dahulu sebelum export.',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#3085d6'
+    });
   }
 </script>
-
 		<!-- JQUERY JS -->
 		<script src="{% static 'js/jquery.min.js'%}"></script>
 

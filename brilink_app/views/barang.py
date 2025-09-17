@@ -5,9 +5,11 @@ from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from brilink_app.decorators import *
 from django.utils.decorators import method_decorator
 
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class BarangViews(View):
     def get(self, request):
         if hasattr(request.user, "role") and request.user.role == "developer":
@@ -21,7 +23,9 @@ class BarangViews(View):
             'barang' : barang,
             }
         return render(request, 'barang/barang.html',data)
+    
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class BarangCreateViews(View):
     def post(self, request):
         frm_id_pemilik = request.POST.get('id_pemilik')
@@ -47,6 +51,7 @@ class BarangCreateViews(View):
             return redirect('app:index_barang')
         
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class BarangEditViews(View):
     def get(self, request, id_barang):
         try:
@@ -83,7 +88,9 @@ class BarangEditViews(View):
             print('Error:', e)
             messages.error(request, "Gagal mengubah Barang")
             return redirect('app:index_barang')
-
+        
+@method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class BarangHapusViews(View):
     def get(self, request, id_barang):
         try:
@@ -98,6 +105,7 @@ class BarangHapusViews(View):
         return redirect('app:index_barang')
 
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class TambahStokViews(View):
     def post(self, request,  id_barang):
         barang = get_object_or_404(Barang, pk=id_barang)

@@ -10,7 +10,7 @@
 									<li class="breadcrumb-item active" aria-current="page">Dashboard 01</li>
 								</ol>
 							</div>
-							{% if rekening_list %}
+							{% if rekening %}
 								{% if request.user.role == 'admin' or request.user.role == 'developer' %}
 								<!-- Jika user punya rekening -->
 								<div class="ms-auto pageheader-btn">
@@ -19,7 +19,7 @@
 											<i class="fe fe-plus"></i>
 										</span> Tambah Rekening
 									</a>
-									<a href="#" data-bs-target="#modaldemo3" data-bs-toggle="modal" class="btn btn-success btn-icon text-white">
+									<a href="#" data-bs-target="#modalTambahTransaksi" data-bs-toggle="modal" class="btn btn-success btn-icon text-white">
 										<span>
 											<i class="fe fe-log-in"></i>
 										</span> Tambah Transaksi
@@ -27,7 +27,7 @@
 								</div>
 								{% else %}
 								<div class="ms-auto pageheader-btn">
-									<a href="#" data-bs-target="#modaldemo3" data-bs-toggle="modal" class="btn btn-success btn-icon text-white">
+									<a href="#" data-bs-target="#modalTambahTransaksi" data-bs-toggle="modal" class="btn btn-success btn-icon text-white">
 										<span>
 											<i class="fe fe-log-in"></i>
 										</span> Tambah Transaksi
@@ -52,8 +52,8 @@
 
 						<!-- ROW-1 -->
 						<div class="row">
-							{% if rekening_list %}
-								{% for rek in rekening_list %}
+							{% if rekening %}
+								{% for rek in rekening %}
 								<div class="col-lg-4 col-md-6 col-sm-12">
 									<div class="card overflow-hidden mb-3">
 										<div class="card-body">
@@ -281,6 +281,93 @@
 				</div>
 				<!-- CONTAINER END -->
             </div>
+			<div class="modal fade" id="modalTambahTransaksi" tabindex="-1" aria-labelledby="modalTambahTransaksiLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTambahTransaksiLabel">Tambah Transaksi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'app:tambah_transaksi' %}" method="post">
+          {% csrf_token %}
+
+          <!-- Jenis Transaksi -->
+          <div class="mb-3">
+            <label for="jenis" class="form-label">Jenis Transaksi</label>
+            <select name="jenis" id="jenis" class="form-control" required onchange="toggleJenis()">
+              <option value="" disabled selected>-- Pilih Jenis --</option>
+              {% for jns in jenis %}
+              <option value="{{ jns.jenis_id }}" data-kategori="{{ jns.kategori }}">{{ jns.nama }} </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Rekening Sumber (hanya untuk bank) -->
+          <div class="mb-3" id="field_rek_sumber" style="display:none;">
+            <label for="rekening_sumber" class="form-label">Rekening Sumber</label>
+            <select name="rekening_sumber" id="rekening_sumber" class="form-control"  onchange="filterRekeningTujuan()">
+              <option value="" disabled selected>-- Pilih Rekening --</option>
+              {% for rek in rekening %}
+              <option value="{{ rek.rek_id }}">{{ rek.nama_rek }} (Saldo: {{ rek.saldo|intcomma }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Rekening Tujuan -->
+          <div class="mb-3">
+            <label for="rekening_tujuan" class="form-label">Rekening Tujuan</label>
+            <select name="rekening_tujuan" id="rekening_tujuan" class="form-control" required>
+              <option value="" disabled selected>-- Pilih Rekening --</option>
+              {% for rek in rekening %}
+              <option value="{{ rek.rek_id }}">{{ rek.nama_rek }} (Saldo: {{ rek.saldo|intcomma }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Jumlah (hanya untuk bank) -->
+         <div class="mb-3" id="field_jumlah" style="display:none;">
+          <label for="jumlah_display" class="form-label">Jumlah</label>
+          <!-- Input tampilan (user lihat ini) -->
+          <input type="text" id="jumlah_display" class="form-control" placeholder="Masukkan jumlah transfer" oninput="formatJumlah()">
+
+          <!-- Input asli (hidden, untuk dikirim ke server) -->
+          <input type="hidden" name="jumlah" id="jumlah">
+        </div>
+
+          <!-- Barang & Qty (hanya untuk barang) -->
+          <div class="mb-3" id="field_barang" style="display:none;">
+            <label for="barang" class="form-label">Barang</label>
+            <select name="barang" id="barang" class="form-control">
+              <option value="" disabled selected>-- Pilih Barang --</option>
+              {% for b in barang %}
+              <option value="{{ b.barang_id }}">{{ b.nama }} (Stok: {{ b.stok }}, Harga: {{ b.harga|intcomma }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3" id="field_qty" style="display:none;">
+            <label for="qty" class="form-label">Jumlah Barang</label>
+            <input type="number" name="qty" id="qty" class="form-control" min="1" placeholder="Masukkan jumlah barang">
+          </div>
+
+          <!-- Keterangan -->
+          <div class="mb-3">
+            <label for="keterangan" class="form-label">Keterangan</label>
+            <textarea name="keterangan" id="keterangan" class="form-control" rows="3" placeholder="Opsional"></textarea>
+          </div>
+
+          <input type="hidden" name="dibuat_oleh" value="{{ request.user.user_id }}">
+
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Simpan</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 			<div class="modal fade" id="modaldemo1" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
 				<div class="modal-dialog" role="document">
 				  <div class="modal-content">
@@ -310,157 +397,65 @@
 				</div>
 			  </div>
 
-			  <div class="modal fade" id="modaldemo3" tabindex="-1" aria-labelledby="modaldemo1Label" aria-hidden="true">
-				<div class="modal-dialog" role="document">
-				  <div class="modal-content">
-					<div class="modal-header">
-					  <h5 class="modal-title" id="modaldemo3Label">Tambah Transaksi</h5>
-					  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-					  <form action="#" method="post">
-						{% csrf_token %}
-						<!-- Pilihan Jenis Transaksi -->
-						<div class="mb-3">
-							<label for="jenis" class="form-label">Jenis Transaksi</label>
-							<select name="jenis" id="jenis" class="form-control" required onchange="toggleTransactionFields()">
-							<option value="" selected disabled>Pilih Jenis</option>
-							<option value="transfer">Transfer</option>
-							<option value="tarik_tunai">Tarik Tunai</option>
-							<option value="isi_saldo">Isi Saldo</option>
-							</select>
-						</div>
+			  
 
-						<!-- Pilihan Tujuan Transfer -->
-						<div class="mb-3" id="transfer-options" style="display: none;">
-							<label for="tujuan" class="form-label">Tujuan Transfer</label>
-							<select name="tujuan" id="tujuan" class="form-control" onchange="toggleEwalletBankFields()">
-							<option value="" selected disabled>Pilih Tujuan</option>
-							<option value="ewallet">E-Wallet</option>
-							<option value="bank">Bank</option>
-							</select>
-						</div>
+<script>
+function toggleJenis() {
+  const select = document.getElementById("jenis");
+  const kategori = select.options[select.selectedIndex].getAttribute("data-kategori");
 
-						<!-- Dropdown untuk E-Wallet -->
-						<div class="mb-3" id="ewallet-options" style="display: none;">
-							<label for="ewallet" class="form-label">Pilih E-Wallet</label>
-							<select name="ewallet" id="ewallet" class="form-control">
-							<option value="" selected disabled>Pilih E-Wallet</option>
-							<option value="DANA">DANA</option>
-							<option value="OVO">OVO</option>
-							<option value="GoPay">GoPay</option>
-							</select>
-						</div>
+  // reset semua dulu
+  document.getElementById("field_rek_sumber").style.display = "none";
+  document.getElementById("field_jumlah").style.display = "none";
+  document.getElementById("field_barang").style.display = "none";
+  document.getElementById("field_qty").style.display = "none";
 
-						<!-- Dropdown untuk Bank -->
-						<div class="mb-3" id="bank-options" style="display: none;">
-							<label for="bank" class="form-label">Pilih Bank</label>
-							<select name="bank" id="bank" class="form-control">
-							<option value="" selected disabled>Pilih Bank</option>
-							<option value="BRI">BRI</option>
-							<option value="BNI">BNI</option>
-							<option value="BCA">BCA</option>
-							<option value="Mandiri">Mandiri</option>
-							<option value="lainnya">Lainnya</option>
-							</select>
-						</div>
-
-						<!-- Input untuk Bank Lainnya -->
-						<div class="mb-3" id="bank-lainnya" style="display: none;">
-							<label for="bank_lainnya" class="form-label">Nama Bank Lainnya</label>
-							<input type="text" name="bank_lainnya" id="bank_lainnya" class="form-control" placeholder="Masukkan Nama Bank">
-						</div>
-
-						<!-- Input Saldo Keluar -->
-						<div class="mb-3" id="saldo-keluar" style="display: none;">
-							<label for="saldo_keluar" class="form-label">Jumlah Saldo Keluar</label>
-							<input type="number" name="saldo_keluar" class="form-control" id="saldo_keluar">
-						</div>
-
-						<!-- Input Saldo Masuk -->
-						<div class="mb-3" id="saldo-masuk" style="display: none;">
-							<label for="saldo_masuk" class="form-label">Jumlah Saldo Masuk</label>
-							<input type="number" name="saldo_masuk" class="form-control" id="saldo_masuk">
-						</div>
-						<div class="modal-footer">
-						  <button type="submit" class="btn btn-primary">Save changes</button>
-						  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-						</div>
-					  </form>
-					</div>
-				  </div>
-				</div>
-			  </div>
-
-			  <script>
-function toggleTransactionFields() {
-var jenis = document.getElementById("jenis").value;
-var transferOptions = document.getElementById("transfer-options");
-var saldoKeluar = document.getElementById("saldo-keluar");
-var saldoMasuk = document.getElementById("saldo-masuk");
-
-if (jenis === "transfer") {
-transferOptions.style.display = "block";
-saldoKeluar.style.display = "block";
-saldoMasuk.style.display = "none";
-} else if (jenis === "tarik_tunai") {
-transferOptions.style.display = "none";
-saldoKeluar.style.display = "block";
-saldoMasuk.style.display = "none";
-} else if (jenis === "isi_saldo") {
-transferOptions.style.display = "none";
-saldoKeluar.style.display = "none";
-saldoMasuk.style.display = "block";
-} else {
-transferOptions.style.display = "none";
-saldoKeluar.style.display = "none";
-saldoMasuk.style.display = "none";
+  // tampilkan sesuai kategori
+  if (kategori === "KEUANGAN") {
+    document.getElementById("field_rek_sumber").style.display = "block";
+    document.getElementById("field_jumlah").style.display = "block";
+  } else if (kategori === "BARANG") {
+    document.getElementById("field_barang").style.display = "block";
+    document.getElementById("field_qty").style.display = "block";
+  }
 }
 
-toggleEwalletBankFields(); // Reset e-wallet/bank fields jika berubah
+function filterRekeningTujuan() {
+  const sumber = document.getElementById("rekening_sumber").value;
+  const tujuan = document.getElementById("rekening_tujuan");
+
+  for (let option of tujuan.options) {
+    if (option.value === sumber && sumber !== "") {
+      option.style.display = "none"; // sembunyikan rekening yg dipilih
+    } else {
+      option.style.display = "block"; // tampilkan lainnya
+    }
+  }
+
+  // reset kalau tujuan = sumber
+  if (tujuan.value === sumber) {
+    tujuan.value = "";
+  }
 }
 
-function toggleEwalletBankFields() {
-var tujuan = document.getElementById("tujuan").value;
-var ewalletOptions = document.getElementById("ewallet-options");
-var bankOptions = document.getElementById("bank-options");
+function formatJumlah() {
+  let displayInput = document.getElementById("jumlah_display");
+  let hiddenInput = document.getElementById("jumlah");
 
-if (tujuan === "ewallet") {
-ewalletOptions.style.display = "block";
-bankOptions.style.display = "none";
-} else if (tujuan === "bank") {
-ewalletOptions.style.display = "none";
-bankOptions.style.display = "block";
-} else {
-ewalletOptions.style.display = "none";
-bankOptions.style.display = "none";
-}
+  // Hilangkan semua karakter non-angka
+  let value = displayInput.value.replace(/[^0-9]/g, "");
 
-toggleBankLainnya();
-}
+  if (value === "") {
+    hiddenInput.value = "";
+    displayInput.value = "";
+    return;
+  }
 
-function toggleBankLainnya() {
-var bank = document.getElementById("bank").value;
-var bankLainnya = document.getElementById("bank-lainnya");
+  // Simpan angka asli ke input hidden
+  hiddenInput.value = value;
 
-if (bank === "lainnya") {
-bankLainnya.style.display = "block";
-} else {
-bankLainnya.style.display = "none";
-}
+  // Format ribuan (pakai titik, contoh: 1000000 -> 1.000.000)
+  displayInput.value = new Intl.NumberFormat("id-ID").format(value);
 }
 </script>
-
-
-			  <script>
-				function validateSaldo() {
-					let saldo = document.getElementById("saldo_awal").value;
-					if (isNaN(saldo) || saldo < 0) {
-						alert("Saldo hanya boleh berupa angka positif!");
-						return false;
-					}
-					return true;
-				}
-				</script>
-
 			{% endblock %}

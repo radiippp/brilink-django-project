@@ -6,8 +6,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from brilink_app.decorators import *
 
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class RekViews(View):
     def get(self, request):
         if hasattr(request.user, "role") and request.user.role == "developer":
@@ -22,6 +24,7 @@ class RekViews(View):
         return render(request, 'rekening/rekening.html',data)
 
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class RekCreateViews(View):
     def post(self, request):
         frm_id_pemilik = request.POST.get('id_pemilik')
@@ -45,6 +48,7 @@ class RekCreateViews(View):
             return redirect('app:index_rekening')
         
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class RekEditViews(View):
     def get(self, request, id_rek):
         try:
@@ -79,7 +83,9 @@ class RekEditViews(View):
             print('Error:', e)
             messages.error(request, "Gagal mengubah rekening")
             return redirect('app:index_rekening')
-        
+
+@method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')      
 class RekHapusViews(View):
     def get(self, request, id_rek):
         try:
@@ -94,6 +100,7 @@ class RekHapusViews(View):
         return redirect('app:index_rekening')
 
 @method_decorator(login_required(), name='dispatch')
+@method_decorator(role_required(allowed_roles=['admin', 'developer']), name='dispatch')
 class TambahSaldoViews(View):
     def post(self, request,  id_rek):
         rek = get_object_or_404(Rekening, pk=id_rek)

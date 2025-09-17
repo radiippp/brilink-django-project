@@ -31,12 +31,20 @@ urlpatterns = [
         path('', barang.BarangViews.as_view(), name='index_barang'),
         path('tambah/', barang.BarangCreateViews.as_view(), name='tambah_barang'),
         path('edit/<str:id_barang>/', barang.BarangEditViews.as_view(), name='edit_barang'),
-        path('hapus/<str:id_brg>/', barang.BarangHapusViews.as_view(), name='hapus_barang'),
+        path('hapus/<str:id_barang>/', barang.BarangHapusViews.as_view(), name='hapus_barang'),
         path('restok/<str:id_barang>/', barang.TambahStokViews.as_view(), name='restok'),
+    ]) ),
+
+    path('jenis/',include([
+        path('', jenis.JenisViews.as_view(), name='index_jenis'),
+        path('tambah/', jenis.JenisCreateViews.as_view(), name='tambah_jenis'),
+        path('edit/<str:id_jenis>/', jenis.JenisEditViews.as_view(), name='edit_jenis'),
+        path('hapus/<str:id_jenis>/', jenis.JenisHapusViews.as_view(), name='hapus_jenis'),
     ]) ),
 
     path('transaksi/', include([
         path('',transaksi.TransaksiViews.as_view(), name='index_transaksi'),
+        path('export/',transaksi.ExportTransaksiExcelView.as_view(), name='export_transaksi'),
         path('tambah/',transaksi.TransaksiCreateViews.as_view(), name='tambah_transaksi'),
         path('hapus/<str:id_transaksi>/',transaksi.TransaksiHapusViews.as_view(), name='hapus_transaksi'),
     ])),

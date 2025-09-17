@@ -55,6 +55,11 @@
 				<img src="{% static 'images/loader.svg'%}" class="loader-img" alt="Loader">
 			</div>
 			<!-- /GLOABAL LOADER -->
+			 {% if messages %}
+				{% for message in messages %}
+					<div class="msg_pesan" data-message="{{ message }}" data-tag="{{ message.tags }}"></div>
+				{% endfor %}
+			{% endif %}
 
 			<!-- PAGE -->
 			<div class="page">
@@ -105,6 +110,47 @@
 			<!-- End PAGE -->
 
 		</div>
+
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+      function show_notif(meseg, jenis_icon) {
+        if (jenis_icon == "error") {
+          button_style = "btn-danger";
+        } else {
+          button_style = `btn-${jenis_icon}`;
+        }
+
+        Swal.fire({
+          html: meseg,
+          icon: jenis_icon,
+          buttonsStyling: false,
+          confirmButtonText: "OK",
+          customClass: {
+            confirmButton: `btn ${button_style}`,
+          },
+        });
+      }
+
+      document.querySelectorAll(".msg_pesan").forEach(function (el) {
+		const message = el.getAttribute("data-message");
+		const tag = el.getAttribute("data-tag");
+		show_notif(message, tag);
+	});
+
+	  
+    </script>
+	<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("a[data-message]").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+            var pesan = el.getAttribute("data-message");
+            if (!confirm(pesan)) {
+                e.preventDefault(); // batalkan redirect kalau user pilih "Cancel"
+            }
+        });
+    });
+});
+</script>
 		<!-- BACKGROUND-IMAGE CLOSED -->
 
 		<!-- JQUERY JS -->
