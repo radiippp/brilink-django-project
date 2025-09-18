@@ -15,12 +15,27 @@ from django.http import HttpResponse
 @method_decorator(login_required(), name='dispatch')
 class ExportTransaksiExcelView(View):
     def get(self, request):
+        user = request.user
         filter_range = request.GET.get("filter_range")
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
 
         # Ambil queryset sesuai filter (samakan dengan list transaksi kamu)
-        transaksi = Transaksi.objects.all()
+        transaksi = Transaksi.objects.none()
+
+        # role filtering (sama persis dengan TransaksiViews)
+        if user.is_superuser:
+            transaksi = Transaksi.objects.all().order_by("-created_at")
+        elif user.role == "admin":
+            staff_ids = Master_User.objects.filter(created_by=user).values_list("pk", flat=True)
+            transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, *staff_ids]).order_by("-created_at")
+        elif user.role == "staff":
+            if user.created_by:
+                transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, user.created_by]).order_by("-created_at")
+            else:
+                transaksi = Transaksi.objects.filter(dibuat_oleh=user).order_by("-created_at")
+        else:
+            transaksi = Transaksi.objects.filter(created_by=user).order_by("-created_at")
         if filter_range:
             # logika filter sama persis dengan list transaksi
             pass  
@@ -90,17 +105,17 @@ class TransaksiViews(View):
 
         # role filtering
         if user.is_superuser:
-            transaksi = Transaksi.objects.all()
+            transaksi = Transaksi.objects.all().order_by("-created_at")
         elif user.role == "admin":
             staff_ids = Master_User.objects.filter(created_by=user).values_list("pk", flat=True)
-            transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, *staff_ids])
+            transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, *staff_ids]).order_by("-created_at")
         elif user.role == "staff":
             if user.created_by:
-                transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, user.created_by])
+                transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, user.created_by]).order_by("-created_at")
             else:
-                transaksi = Transaksi.objects.filter(dibuat_oleh=user)
+                transaksi = Transaksi.objects.filter(dibuat_oleh=user).order_by("-created_at")
         else:
-            transaksi = Transaksi.objects.filter(created_by=user)
+            transaksi = Transaksi.objects.filter(created_by=user).order_by("-created_at")
 
         # filter tanggal
         start_date = request.GET.get("start_date")

@@ -17,11 +17,11 @@ class UserViews(View):
     
     def get(self, request):
         if hasattr(request.user, "role") and request.user.role == "developer":
-            user = Master_User.objects.all()
+            user = Master_User.objects.all().order_by("-created_at")
         elif request.user.role == "admin":
-            user = Master_User.objects.filter(created_by=request.user.user_id)
+            user = Master_User.objects.filter(created_by=request.user.user_id).order_by("-created_at")
         else:
-            user = Master_User.objects.none()
+            user = Master_User.objects.none().order_by("-created_at")
         data ={
             'user' : user,
             }

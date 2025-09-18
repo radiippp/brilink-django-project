@@ -13,9 +13,9 @@ from brilink_app.decorators import *
 class RekViews(View):
     def get(self, request):
         if hasattr(request.user, "role") and request.user.role == "developer":
-            rekening = Rekening.objects.all()
+            rekening = Rekening.objects.all().order_by("-created_at")
         elif request.user.role == "admin":
-            rekening = Rekening.objects.filter(pemilik=request.user.user_id)
+            rekening = Rekening.objects.filter(pemilik=request.user.user_id).order_by("-created_at")
         else:
             rekening = Rekening.objects.none()
         data ={

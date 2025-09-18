@@ -13,9 +13,9 @@ from django.utils.decorators import method_decorator
 class BarangViews(View):
     def get(self, request):
         if hasattr(request.user, "role") and request.user.role == "developer":
-            barang = Barang.objects.all()
+            barang = Barang.objects.all().order_by("-created_at")
         elif request.user.role == "admin":
-            barang = Barang.objects.filter(pemilik=request.user.user_id)
+            barang = Barang.objects.filter(pemilik=request.user.user_id).order_by("-created_at")
         else:
             barang = Barang.objects.none()
         

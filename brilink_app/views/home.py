@@ -2,11 +2,30 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from brilink_app.models import Master_User, Rekening, Transaksi,Barang,JenisTransaksi
+from brilink_app.models import Master_User, Rekening, Transaksi,Barang,JenisTransaksi, Transaksi
 
 @method_decorator(login_required(), name='dispatch')
 class HomeViews(View):
     def get(self, request):
+        user = request.user
+
+        # default queryset
+        transaksi = Transaksi.objects.none()
+
+        # role filtering
+        if user.is_superuser:
+            transaksi = Transaksi.objects.all().order_by("-created_at")
+        elif user.role == "admin":
+            staff_ids = Master_User.objects.filter(created_by=user).values_list("pk", flat=True)
+            transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, *staff_ids]).order_by("-created_at")
+        elif user.role == "staff":
+            if user.created_by:
+                transaksi = Transaksi.objects.filter(dibuat_oleh__in=[user.pk, user.created_by]).order_by("-created_at")
+            else:
+                transaksi = Transaksi.objects.filter(dibuat_oleh=user).order_by("-created_at")
+        else:
+            transaksi = Transaksi.objects.filter(created_by=user).order_by("-created_at")
+
         if hasattr(request.user, "role") and request.user.role == "developer":
             rekening = Rekening.objects.all()
         elif request.user.role == "admin":

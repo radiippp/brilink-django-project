@@ -13,9 +13,9 @@ from brilink_app.decorators import *
 class JenisViews(View):
     def get(self, request):
         if hasattr(request.user, "role") and request.user.role == "developer":
-            jenis = JenisTransaksi.objects.all()
+            jenis = JenisTransaksi.objects.all().order_by("-created_at")
         elif request.user.role == "admin":
-            jenis = JenisTransaksi.objects.filter(created_by=request.user.user_id)
+            jenis = JenisTransaksi.objects.filter(created_by=request.user.user_id).order_by("-created_at")
         else:
             jenis = JenisTransaksi.objects.none()
         
