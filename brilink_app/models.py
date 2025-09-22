@@ -190,3 +190,5 @@ class Transaksi(CreateUpdateTime):
             self.rekening_tujuan.save()
 
         self.save()
+        batas_waktu = timezone.now() - timedelta(days=5*30)
+        Transaksi.objects.filter(created_at__lt=batas_waktu).delete()
