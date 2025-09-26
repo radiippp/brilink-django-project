@@ -213,6 +213,7 @@ class TransaksiCreateViews(View):
         frm_barang = request.POST.get("barang")
         frm_jumlah = request.POST.get("jumlah")
         frm_qty = request.POST.get("qty")
+        frm_tax = request.POST.get("tax")
         frm_keterangan = request.POST.get("keterangan")
         frm_dibuat = request.POST.get("dibuat_oleh")
 
@@ -241,6 +242,7 @@ class TransaksiCreateViews(View):
                 else :
                     transaksi = Transaksi.objects.create(
                         jenis=tmp_jenis,
+                        tax=Decimal(frm_tax),
                         rekening_sumber=rekening_sumber,
                         rekening_tujuan=rekening_tujuan,
                         jumlah=Decimal(frm_jumlah),

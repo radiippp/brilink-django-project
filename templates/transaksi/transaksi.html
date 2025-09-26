@@ -62,6 +62,7 @@
 									<th class="border-bottom-0">Barang</th>
 									<th class="border-bottom-0">Qty</th>
 									<th class="border-bottom-0">Jumlah</th>
+                  <th class="border-bottom-0">Admin</th>
 									<th class="border-bottom-0">Keterangan</th>
 									<th class="border-bottom-0">Tanggal</th>
 									<th class="border-bottom-0">Dibuat Oleh</th>
@@ -81,6 +82,7 @@
                       <td>{{ trx.barang.nama|default:"-" }}</td>
                       <td>{{ trx.qty }}</td>
                       <td>{{ trx.jumlah|intcomma }}</td>
+                      <td>{{ trx.tax|intcomma|default:"-" }}</td>
                       <td>{{ trx.keterangan }}</td>
                       <td>{{ trx.created_at|date:"d M Y H:i" }}</td>
                       <td>{{ trx.dibuat_oleh.full_name }}</td>
@@ -188,6 +190,12 @@
           <input type="hidden" name="jumlah" id="jumlah">
         </div>
 
+        <div class="mb-3" id="pajak" style="display:none;">
+          <label for="tax" class="form-label">Admin</label>
+          <!-- Input tampilan (user lihat ini) -->
+          <input type="text" id="tax" name="tax" class="form-control" placeholder="Masukkan jumlah admin">
+        </div>
+
           <!-- Barang & Qty (hanya untuk barang) -->
           <div class="mb-3" id="field_barang" style="display:none;">
             <label for="barang" class="form-label">Barang</label>
@@ -237,6 +245,7 @@ function toggleJenis() {
   if (kategori === "KEUANGAN") {
     document.getElementById("field_rek_sumber").style.display = "block";
     document.getElementById("field_jumlah").style.display = "block";
+    document.getElementById("pajak").style.display = "block";
   } else if (kategori === "BARANG") {
     document.getElementById("field_barang").style.display = "block";
     document.getElementById("field_qty").style.display = "block";
