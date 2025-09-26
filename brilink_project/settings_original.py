@@ -137,3 +137,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'app:login_page'
+AUTH_USER_MODEL = 'brilink_app.Master_User'
