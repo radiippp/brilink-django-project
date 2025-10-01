@@ -119,5 +119,8 @@ class TambahSaldoViews(View):
         rek.saldo += saldo_baru
         rek.save()
 
-        messages.success(request, f"saldo untuk {rek.nama_rek} berhasil ditambah RP.{saldo_baru}!")
+        messages.success(
+    request,
+    f"Saldo untuk {rek.nama_rek} berhasil ditambah Rp. {saldo_baru:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+)
         return redirect('app:index_rekening')

@@ -148,6 +148,11 @@ class Transaksi(CreateUpdateTime):
         "Rekening", related_name="transaksi_tujuan",
         on_delete=models.CASCADE, null=True, blank=True
     )
+    rekening_tax = models.ForeignKey(   # <-- tambahan
+        "Rekening", related_name="transaksi_tax",
+        on_delete=models.CASCADE, null=True, blank=True,
+        help_text="Rekening khusus untuk menerima tax"
+    )
     barang = models.ForeignKey(
         "Barang", on_delete=models.CASCADE, null=True, blank=True
     )
@@ -167,9 +172,17 @@ class Transaksi(CreateUpdateTime):
             self.rekening_sumber.saldo -= self.jumlah
             self.rekening_sumber.save()
 
-            # saldo tujuan bertambah (termasuk tax kalau ada)
-            self.rekening_tujuan.saldo += self.jumlah + self.tax
+            self.rekening_tujuan.saldo += self.jumlah
             self.rekening_tujuan.save()
+
+            # saldo tujuan bertambah (termasuk tax kalau ada)
+            if self.tax > 0:
+                if self.rekening_tax:
+                    self.rekening_tax.saldo += self.tax
+                    self.rekening_tax.save()
+                else:
+                    self.rekening_tujuan.saldo += self.tax
+                    self.rekening_tujuan.save()
 
         elif self.jenis.kategori == "BARANG":
             if not self.barang:

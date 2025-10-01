@@ -210,6 +210,7 @@ class TransaksiCreateViews(View):
         frm_jenis = request.POST.get("jenis")  # transfer / barang
         frm_rekening_sumber = request.POST.get("rekening_sumber")
         frm_rekening_tujuan = request.POST.get("rekening_tujuan")
+        frm_rekening_tax = request.POST.get("rekening_tax")
         frm_barang = request.POST.get("barang")
         frm_jumlah = request.POST.get("jumlah")
         frm_qty = request.POST.get("qty")
@@ -225,6 +226,7 @@ class TransaksiCreateViews(View):
                     rekening_sumber = get_object_or_404(Rekening, pk=frm_rekening_sumber)
 
                 rekening_tujuan = get_object_or_404(Rekening, pk=frm_rekening_tujuan)
+                rekening_tax = get_object_or_404(Rekening, pk=frm_rekening_tax)
                 tmp_jenis =  get_object_or_404(JenisTransaksi, pk=frm_jenis)
 
                 barang = None
@@ -243,6 +245,7 @@ class TransaksiCreateViews(View):
                     transaksi = Transaksi.objects.create(
                         jenis=tmp_jenis,
                         tax=Decimal(frm_tax),
+                        rekening_tax=rekening_tax,
                         rekening_sumber=rekening_sumber,
                         rekening_tujuan=rekening_tujuan,
                         jumlah=Decimal(frm_jumlah),

@@ -185,15 +185,26 @@
           <label for="jumlah_display" class="form-label">Jumlah</label>
           <!-- Input tampilan (user lihat ini) -->
           <input type="text" id="jumlah_display" class="form-control" placeholder="Masukkan jumlah transfer" oninput="formatJumlah()">
-
           <!-- Input asli (hidden, untuk dikirim ke server) -->
           <input type="hidden" name="jumlah" id="jumlah">
         </div>
 
-        <div class="mb-3" id="pajak" style="display:none;">
-          <label for="tax" class="form-label">Admin</label>
+        <div class="mb-3" id="field_rek_tax" style="display:none;">
+          <label for="rekening_tax" class="form-label">Rekening Admin (Opsional)</label>
+          <select name="rekening_tax" id="rekening_tax" class="form-control">
+            <option value="" selected>-- Gunakan rekening tujuan --</option>
+            {% for rek in rekening %}
+            <option value="{{ rek.rek_id }}">{{ rek.nama_rek }} (Saldo: {{ rek.saldo|intcomma }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3" id="field_tax" style="display:none;">
+          <label for="tax_display" class="form-label">Admin</label>
           <!-- Input tampilan (user lihat ini) -->
-          <input type="text" id="tax" name="tax" class="form-control" placeholder="Masukkan jumlah admin">
+          <input type="text" id="tax_display" class="form-control" placeholder="Masukkan jumlah admin" oninput="formatTax()">
+          <!-- Input asli (hidden, untuk dikirim ke server) -->
+          <input type="hidden" name="tax" id="tax">
         </div>
 
           <!-- Barang & Qty (hanya untuk barang) -->
@@ -240,12 +251,15 @@ function toggleJenis() {
   document.getElementById("field_jumlah").style.display = "none";
   document.getElementById("field_barang").style.display = "none";
   document.getElementById("field_qty").style.display = "none";
+  document.getElementById("field_rek_tax").style.display = "none";
+  document.getElementById("field_tax").style.display = "none";
 
   // tampilkan sesuai kategori
   if (kategori === "KEUANGAN") {
     document.getElementById("field_rek_sumber").style.display = "block";
     document.getElementById("field_jumlah").style.display = "block";
-    document.getElementById("pajak").style.display = "block";
+    document.getElementById("field_tax").style.display = "block";
+    document.getElementById("field_rek_tax").style.display = "block";
   } else if (kategori === "BARANG") {
     document.getElementById("field_barang").style.display = "block";
     document.getElementById("field_qty").style.display = "block";
@@ -288,6 +302,22 @@ function formatJumlah() {
 
   // Format ribuan (pakai titik, contoh: 1000000 -> 1.000.000)
   displayInput.value = new Intl.NumberFormat("id-ID").format(value);
+}
+</script>
+
+<script>
+function formatTax() {
+    let display = document.getElementById("tax_display");
+    let hidden = document.getElementById("tax");
+
+    // Ambil hanya angka
+    let value = display.value.replace(/\D/g, "");
+
+    // Simpan ke hidden input (angka murni)
+    hidden.value = value;
+
+    // Format dengan titik pemisah ribuan
+    display.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 </script>
 

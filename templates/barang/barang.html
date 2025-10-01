@@ -156,10 +156,19 @@
 								<label for="nama_barang" class="form-label">Nama Barang</label>
 								<input type="text" name="nama_barang" class="form-control" id="nama_barang" required />
 							</div>
-                            <div class="mb-3">
-								<label for="harga" class="form-label">Masukkan Harga</label>
-								<input type="number" name="harga" class="form-control" id="harga" min="0" required />
-								<small>Pastikan Input Dengan Angka</small>
+                           <div class="mb-3">
+							<label for="harga_display" class="form-label">Masukkan Harga</label>
+							
+							<!-- Input tampilan (dengan titik ribuan) -->
+							<input type="text" id="harga_display" 
+									class="form-control" 
+									placeholder="Masukkan harga" 
+									oninput="formatHarga()" 
+									onkeypress="return hanyaAngka(event)">
+							
+							<!-- Input hidden (kirim ke server) -->
+							<input type="hidden" name="harga" id="harga" required>
+							<small>Masukkan angka harga (tanpa huruf/simbol)</small>
 							</div>
                             <div class="mb-3">
 								<label for="stok_awal" class="form-label">Masukkan Stok Awal</label>
@@ -177,6 +186,34 @@
 				</div>
 			  </div>
 
+			  <script>
+function hanyaAngka(evt) {
+    let charCode = evt.which ? evt.which : evt.keyCode;
+    // Hanya boleh angka (0–9), backspace, delete
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        return false;
+    }
+    return true;
+}
+
+function formatHarga() {
+    let display = document.getElementById("harga_display");
+    let hidden = document.getElementById("harga");
+
+    // Ambil hanya angka
+    let value = display.value.replace(/\D/g, "");
+
+    // Simpan angka murni ke hidden
+    hidden.value = value;
+
+    // Format tampilan dengan titik ribuan
+    if (value) {
+        display.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    } else {
+        display.value = "";
+    }
+}
+</script>
               
 <script>
 	function validateSaldo() {
@@ -194,5 +231,6 @@
 	return true;
 	}
 </script>
+
 
 {% endblock %}

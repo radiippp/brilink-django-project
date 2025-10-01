@@ -10,12 +10,14 @@ import json
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.timezone import now
 from dateutil.relativedelta import relativedelta
+from django.db.models import Sum
 
 
 @method_decorator(login_required(), name='dispatch')
 class HomeViews(View):
     def get(self, request):
         user = request.user
+        hari_ini = now().date()
 
         
 
@@ -89,6 +91,25 @@ class HomeViews(View):
                 "year": month_obj.year,
                 "label": month_obj.strftime("%B %Y")
             })
+
+        # Hitung jumlah transaksi kategori Barang hari ini
+        total_barang = Transaksi.objects.filter(
+            jenis__kategori="barang",
+            created_at__date=hari_ini
+        ).count() or 0
+
+        # Hitung jumlah transaksi kategori Keuangan hari ini
+        total_keuangan = Transaksi.objects.filter(
+            jenis__kategori="keuangan",
+            created_at__date=hari_ini
+        ).count() or 0
+
+        # Hitung total admin/tax hari ini
+        total_admin = (
+            Transaksi.objects.filter(
+                created_at__date=hari_ini
+            ).aggregate(total=Sum("tax"))["total"] or 0
+        )
         
 
         data={
@@ -100,6 +121,10 @@ class HomeViews(View):
             "bulan": bulan,
             "tahun": tahun,
             "allowed_months": allowed_months,
+            "total_admin": total_admin,
+            "total_barang": total_barang,
+            "total_keuangan": total_keuangan,
+
         }
         return render(request, 'home/index_home.html',data)
         
