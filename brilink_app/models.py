@@ -172,17 +172,27 @@ class Transaksi(CreateUpdateTime):
             self.rekening_sumber.saldo -= self.jumlah
             self.rekening_sumber.save()
 
+            # saldo tujuan bertambah
             self.rekening_tujuan.saldo += self.jumlah
-            self.rekening_tujuan.save()
 
-            # saldo tujuan bertambah (termasuk tax kalau ada)
+            # handle tax
             if self.tax > 0:
                 if self.rekening_tax:
-                    self.rekening_tax.saldo += self.tax
-                    self.rekening_tax.save()
+                    if self.rekening_tax == self.rekening_tujuan:
+                        # kalau tax dan tujuan sama, tambahkan langsung ke tujuan
+                        self.rekening_tujuan.saldo += self.tax
+                    else:
+                        # kalau beda, tax ke rekening admin
+                        self.rekening_tax.saldo += self.tax
+                        self.rekening_tax.save()
                 else:
+                    # kalau tidak ada rekening admin, tax ikut ke tujuan
                     self.rekening_tujuan.saldo += self.tax
-                    self.rekening_tujuan.save()
+
+            # simpan tujuan terakhir
+            self.rekening_tujuan.save()
+
+
 
         elif self.jenis.kategori == "BARANG":
             if not self.barang:

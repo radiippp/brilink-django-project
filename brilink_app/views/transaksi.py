@@ -219,6 +219,10 @@ class TransaksiCreateViews(View):
         frm_dibuat = request.POST.get("dibuat_oleh")
 
         try:
+            if not frm_rekening_tax:
+                frm_rekening_tax = frm_rekening_tujuan
+
+
             with transaction.atomic():
                 tmp_user = get_object_or_404(Master_User, pk=frm_dibuat)
                 rekening_sumber = None

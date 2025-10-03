@@ -74,39 +74,39 @@
                                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                 </div>
                                                                 <div class="modal-body">
-                                                                    <form action="{% url 'app:edit_rekening' id_rek=dt_rek.rek_id %}" method="post" onsubmit="return validateSaldo()">
-                                                                        {% csrf_token %}    
-                                                                        <div class="mb-3">
-																			<label for="nama_rek" class="form-label">Nama Rekening</label>
-																			<input type="text" value="{{ dt_rek.nama_rek }}" name="nama_rek" class="form-control" id="nama_barang" required />
-																		</div>
+                                                                    <form action="{% url 'app:edit_rekening' id_rek=dt_rek.rek_id %}" method="post">
+																		{% csrf_token %}
+																		
 																		<div class="mb-3">
-																			<label for="saldo_awal_display" class="form-label">Masukkan Saldo Awal</label>
+																			<label for="nama_rek" class="form-label">Nama Rekening</label>
+																			<input type="text" name="nama_rek" class="form-control"
+																				id="nama_rek{{ dt_rek.rek_id }}"
+																				value="{{ dt_rek.nama_rek }}" required />
+																		</div>
+
+																		<div class="mb-3">
+																			<label for="saldo_awal_display{{ dt_rek.rek_id }}" class="form-label">Saldo Awal</label>
 
 																			<!-- Input tampilan -->
-																			<input type="text" 
-																					id="saldo_awal_display" 
-																					class="form-control" 
-																					placeholder="Masukkan saldo awal"
-																					value="{{ dt_rek.saldo|stringformat:'d'|intcomma }}" 
-																					oninput="formatRibuan(this, 'saldo_awal')" 
-																					onkeypress="return hanyaAngka(event)" 
-																					required>
+																			<input type="text"
+																				id="saldo_awal_display{{ dt_rek.rek_id }}"
+																				class="form-control"
+																				value="{{ dt_rek.saldo|floatformat:0|intcomma }}"
+																				oninput="formatJumlah('saldo_awal_display{{ dt_rek.rek_id }}', 'saldo_awal{{ dt_rek.rek_id }}')">
 
-																			<!-- Input asli (hidden, dikirim ke server) -->
+																			<!-- Input hidden (yang disimpan ke DB) -->
 																			<input type="hidden" 
-																					name="saldo_awal" 
-																					id="saldo_awal" 
-																					value="{{ dt_rek.saldo }}" 
-																					required>
+																				name="saldo_awal" 
+																				id="saldo_awal{{ dt_rek.rek_id }}"
+																				value="{{ dt_rek.saldo }}">
+																		</div>
 
-																			<small>Pastikan input dengan angka</small>
-																			</div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="submit" class="btn btn-primary">Save changes</button>
-                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                        </div>
-                                                                    </form>
+																		<div class="modal-footer">
+																			<button type="submit" class="btn btn-primary">Simpan</button>
+																			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+																		</div>
+																		</form>
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -126,25 +126,28 @@
 																	{% csrf_token %}
 																	<div class="modal-body">
 																		<div class="mb-3">
-																			<label for="saldo_baru_display{{ dt_rek.rek_id }}" class="form-label">Jumlah saldo Tambahan</label>
+																			<label for="saldo_baru_display{{ dt_rek.rek_id }}" class="form-label">
+																				Masukkan Saldo Tambahan
+																			</label>
 
-																			<!-- Input tampilan (user lihat) -->
+																			<!-- Input tampilan (user isi dengan format ribuan) -->
 																			<input type="text" 
-																				class="form-control" 
 																				id="saldo_baru_display{{ dt_rek.rek_id }}" 
-																				placeholder="Masukkan jumlah saldo" 
-																				oninput="formatRibuan(this, 'saldo_baru{{ dt_rek.rek_id }}')" 
+																				class="form-control" 
+																				placeholder="Masukkan saldo tambahan"
+																				oninput="formatJumlah('saldo_baru_display{{ dt_rek.rek_id }}', 'saldo_baru{{ dt_rek.rek_id }}')" 
 																				onkeypress="return hanyaAngka(event)" 
 																				required>
 
-																			<!-- Input asli (hidden, dikirim ke server) -->
+																			<!-- Input hidden (dikirim ke server) -->
 																			<input type="hidden" 
 																				name="saldo_baru" 
 																				id="saldo_baru{{ dt_rek.rek_id }}" 
 																				required>
 
-																			<small>Masukkan angka saldo yang ingin ditambahkan</small>
+																			<small>Saldo tambahan harus lebih dari 0</small>
 																		</div>
+
 																	</div>
 																	<div class="modal-footer">
 																		<button type="submit" class="btn btn-success">Tambah</button>
@@ -177,28 +180,63 @@
 							{% csrf_token %}
 							<div class="mb-3">
 								<label for="nama_rek" class="form-label">Nama Rekening</label>
-								<input type="text" name="nama_rek" class="form-control" id="nama_rek" list="listRekening" placeholder="Contoh: BRI, BNI, Dana, Gopay" required />
-							<div class="mb-3">
-								<label for="saldo_awal_display" class="form-label">Masukkan Saldo Awal</label>
-								<!-- Input tampilan -->
-								<input type="text" id="saldo_awal_display" class="form-control"
-										placeholder="Masukkan saldo awal"
-										oninput="formatRibuan(this, 'saldo_awal')"
-										onkeypress="return hanyaAngka(event)">
-								<!-- Input asli (hidden, dikirim ke server) -->
-								<input type="hidden" name="saldo_awal" id="saldo_awal" required>
-								<small>Pastikan input hanya angka</small>
-								</div>
-							<input type="hidden" name="id_pemilik" class="form-control" id="id_pemilik" value="{{ request.user.user_id }}" required />
-							<div class="modal-footer">
-								<button type="submit" class="btn btn-primary">Save changes</button>
-								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								<input type="text" name="nama_rek" class="form-control"
+									id="nama_rek" placeholder="Contoh: BRI, BNI, Dana, Gopay" required />
 							</div>
-						</form>
+							<div class="mb-3">
+								<label for="saldo_awal_display" class="form-label">Saldo Awal</label>
+								
+								<!-- Input tampilan -->
+								<input type="text"
+									id="saldo_awal_display"
+									class="form-control"
+									placeholder="Masukkan saldo awal"
+									oninput="formatJumlah('saldo_awal_display', 'saldo_awal')">
+
+								<!-- Input hidden (dikirim ke server) -->
+								<input type="hidden"
+									name="saldo_awal"
+									id="saldo_awal">   <!-- default 0 biar ga kosong -->
+
+								<small>Pastikan input hanya angka</small>
+							</div>
+
+							<input type="hidden" name="id_pemilik" value="{{ request.user.user_id }}" required />
+
+							<div class="modal-footer">
+								<button type="submit" class="btn btn-primary">Simpan</button>
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+							</div>
+							</form>
 					</div>
 				  </div>
 				</div>
 			  </div>
+
+			  <script>
+function formatJumlah(displayId, hiddenId) {
+  let displayInput = document.getElementById(displayId);
+  let hiddenInput = document.getElementById(hiddenId);
+
+  if (!displayInput || !hiddenInput) return;
+
+  // Ambil angka murni
+  let value = displayInput.value.replace(/[^0-9]/g, "");
+
+  if (value === "") {
+    hiddenInput.value = "0";   // fallback biar ga kosong
+    displayInput.value = "";
+    return;
+  }
+
+  // Simpan angka asli di hidden
+  hiddenInput.value = value;
+
+  // Format ribuan di tampilan
+  displayInput.value = new Intl.NumberFormat("id-ID").format(value);
+}
+</script>
+
 <script>
 function hanyaAngka(evt) {
     let charCode = evt.which ? evt.which : evt.keyCode;

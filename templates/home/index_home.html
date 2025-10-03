@@ -488,4 +488,16 @@ function formatTax() {
     display.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 </script>
+<script>
+document.querySelector("form").addEventListener("submit", function(e) {
+    let rekTujuan = document.getElementById("rekening_tujuan").value;
+    let rekAdmin = document.getElementById("rekening_tax");
+
+    // kalau rekening admin belum dipilih
+    if (!rekAdmin.value) {
+        rekAdmin.value = rekTujuan;  // otomatis ikut rekening tujuan
+    }
+});
+</script>
+
 			{% endblock %}
